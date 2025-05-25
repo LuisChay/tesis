@@ -1,11 +1,32 @@
 import { useState } from 'react'
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
+import LandingPage from './common/Landing'
+import LoginPage from './common/Login'
+import ReportesAdmin from './admin/ReportesAdmin'
+import CrearCuenta from './admin/CrearCuenta'
+import EditarUsuarios from './admin/EditarUusarios'
+import ReportesCoord from './coordinador/ReportesCoord'
+import Backlog from './coordinador/Backlog'
+import KanbanBoard from './equipo/Board'
+import ReportesEquipo from './equipo/ReportesEquipo'
+
 import './App.css'
 
 function App() {
   return (
-    <h1 class="text-3xl font-bold  text-center text-blue-600">
-    Hello world!
-  </h1>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin/reportes" element={<ReportesAdmin />} />
+        <Route path="/admin/crear-cuenta" element={<CrearCuenta />} />
+        <Route path="/admin/editar-usuarios" element={<EditarUsuarios />} />
+        <Route path="/coordinador/reportes" element={<ReportesCoord />} />
+        <Route path="/coordinador/backlog" element={<Backlog />} />
+        <Route path="/equipo/board" element={<KanbanBoard />} />
+        <Route path="/equipo/reportes" element={<ReportesEquipo />} />
+      </Routes>
+    </Router>
   )
 
 }
