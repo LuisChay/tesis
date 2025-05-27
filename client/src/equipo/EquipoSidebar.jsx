@@ -14,7 +14,7 @@ const EquipoSidebar = () => {
 
   const cerrarSesion = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -22,13 +22,26 @@ const EquipoSidebar = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-8">Equipo</h2>
         <nav className="space-y-3">
+          <Link to="/equipo/marco" className={linkClass("/equipo/marco")}>
+            Conoce el marco
+          </Link>
           <Link to="/equipo/tablero" className={linkClass("/equipo/tablero")}>
             Tablero Kanban
+          </Link>
+          <Link to="/equipo/sprints" className={linkClass("/equipo/sprints")}>
+            Planificación de Sprints
+          </Link>
+          <Link to="/equipo/dailys" className={linkClass("/equipo/dailys")}>
+            Reunión diaria
+          </Link>
+          <Link to="/equipo/retrospectiva" className={linkClass("/equipo/retrospectiva")}>
+            Retrospectiva
           </Link>
           <Link to="/equipo/reportes" className={linkClass("/equipo/reportes")}>
             Reportes
           </Link>
         </nav>
+
       </div>
       <div className="mt-6">
         <button
@@ -38,6 +51,7 @@ const EquipoSidebar = () => {
           Cerrar sesión
         </button>
       </div>
+
     </aside>
   );
 };

@@ -14,7 +14,7 @@ const CoordSidebar = () => {
 
   const cerrarSesion = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -22,11 +22,17 @@ const CoordSidebar = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-8">Coordinador</h2>
         <nav className="space-y-3">
-          <Link to="/coordinador/reportes" className={linkClass("/coordinador/reportes")}>
-            Reportes
+          <Link to="/coordinador/marco" className={linkClass("/coordinador/marco")}>
+            Conoce el marco
           </Link>
           <Link to="/coordinador/backlog" className={linkClass("/coordinador/backlog")}>
             Backlog Educativo
+          </Link>
+          <Link to="/coordinador/evaluacion" className={linkClass("/coordinador/evaluacion")}>
+            Evaluación continua
+          </Link>
+          <Link to="/coordinador/reportes" className={linkClass("/coordinador/reportes")}>
+            Reportes
           </Link>
         </nav>
       </div>

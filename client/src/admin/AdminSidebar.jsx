@@ -23,15 +23,21 @@ const AdminSidebar = () => {
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-8">Administrador</h2>
         <nav className="space-y-3">
-          <Link to="/admin/reportes" className={linkClass("/admin/reportes")}>
-            Reportes
-          </Link>
-          <Link to="/admin/crear-cuenta" className={linkClass("/admin/crear-cuenta")}>
-            Crear cuentas
-          </Link>
-          <Link to="/admin/editar-usuarios" className={linkClass("/admin/editar-usuarios")}>
-            Editar usuarios
-          </Link>
+        <Link to="/admin/marco" className={linkClass("/admin/marco")}>
+          Conoce el marco
+        </Link>
+        <Link to="/admin/proyectos" className={linkClass("/admin/proyectos")}>
+          Proyectos educativos
+        </Link>
+        <Link to="/admin/crear-cuenta" className={linkClass("/admin/crear-cuenta")}>
+          Crear cuentas
+        </Link>
+        <Link to="/admin/editar-usuarios" className={linkClass("/admin/editar-usuarios")}>
+          Editar usuarios
+        </Link>
+        <Link to="/admin/reportes" className={linkClass("/admin/reportes")}>
+          Reportes
+        </Link>
         </nav>
       </div>
 

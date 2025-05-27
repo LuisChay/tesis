@@ -4,7 +4,7 @@ import EquipoLayout from "./EquipoLayout";
 const ReportesEquipo = () => {
   return (
     <EquipoLayout>
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6">
+      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
           Reportes de Participación
         </h1>

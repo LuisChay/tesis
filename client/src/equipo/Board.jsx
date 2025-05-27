@@ -15,13 +15,17 @@ const columnasIniciales = {
 
 const KanbanBoard = () => {
   const [columnas, setColumnas] = useState(columnasIniciales);
-
   const [formData, setFormData] = useState({
     titulo: "",
     padre: "",
     descripcion: "",
     prioridad: "media",
   });
+
+  const [alerta, setAlerta] = useState(null);
+
+
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   const agregarTarea = () => {
     if (formData.titulo.trim() !== "") {
@@ -41,6 +45,8 @@ const KanbanBoard = () => {
         descripcion: "",
         prioridad: "media",
       });
+
+      setMostrarModal(false); // cerrar modal al agregar
     }
   };
 
@@ -51,14 +57,24 @@ const onDragEnd = (result) => {
   const sourceCol = source.droppableId;
   const destCol = destination.droppableId;
 
-  // No movimiento
   if (sourceCol === destCol && source.index === destination.index) return;
 
-  const updatedSource = [...columnas[sourceCol]];
-  const movedItem = updatedSource.splice(source.index, 1)[0]; // extraer tarea
+  // ❗ Validar límite para "En proceso"
+  if (
+    destCol === "En proceso" &&
+    columnas["En proceso"].length >= 4 &&
+    sourceCol !== "En proceso"
+  ) {
+    setAlerta("La columna 'En proceso' solo puede contener hasta 4 tareas.");
+    setTimeout(() => setAlerta(null), 3000); // Se cierra automáticamente en 3 segundos
 
+    return;
+  }
+
+  const updatedSource = [...columnas[sourceCol]];
+  const movedItem = updatedSource.splice(source.index, 1)[0];
   const updatedDest = [...columnas[destCol]];
-  updatedDest.splice(destination.index, 0, { ...movedItem }); // insertar copia pura
+  updatedDest.splice(destination.index, 0, { ...movedItem });
 
   setColumnas((prev) => ({
     ...prev,
@@ -67,54 +83,83 @@ const onDragEnd = (result) => {
   }));
 };
 
-
   return (
     <EquipoLayout>
-      {/* Formulario */}
-      <div className="mb-6 bg-white p-6 rounded-xl shadow space-y-4 max-w-4xl mx-auto">
-        <h3 className="text-xl font-semibold text-gray-800">Nueva tarea</h3>
-        <input
-          value={formData.titulo}
-          onChange={(e) =>
-            setFormData({ ...formData, titulo: e.target.value })
-          }
-          placeholder="Título"
-          className="w-full border border-gray-300 rounded-md px-4 py-2"
-        />
-        <input
-          value={formData.padre}
-          onChange={(e) =>
-            setFormData({ ...formData, padre: e.target.value })
-          }
-          placeholder="Tarea del Backlog educativo"
-          className="w-full border border-gray-300 rounded-md px-4 py-2"
-        />
-        <textarea
-          value={formData.descripcion}
-          onChange={(e) =>
-            setFormData({ ...formData, descripcion: e.target.value })
-          }
-          placeholder="Descripción"
-          className="w-full border border-gray-300 rounded-md px-4 py-2"
-        />
-        <select
-          value={formData.prioridad}
-          onChange={(e) =>
-            setFormData({ ...formData, prioridad: e.target.value })
-          }
-          className="w-full border border-gray-300 rounded-md px-4 py-2"
-        >
-          <option value="alta">Alta prioridad</option>
-          <option value="media">Media prioridad</option>
-          <option value="baja">Baja prioridad</option>
-        </select>
+      {/* Botón para abrir modal */}
+      <div className="flex justify-end mb-4 max-w-6xl mx-auto">
         <button
-          onClick={agregarTarea}
+          onClick={() => setMostrarModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
-          Agregar
+          ➕ Nueva tarea
         </button>
       </div>
+
+      {/* Modal */}
+      {mostrarModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg space-y-4 relative">
+            <button
+              onClick={() => setMostrarModal(false)}
+              className="absolute top-2 right-3 text-gray-500 hover:text-gray-800"
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-semibold text-gray-800">Nueva tarea</h3>
+            <input
+              value={formData.titulo}
+              onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+              placeholder="Título"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+            />
+            <input
+              value={formData.padre}
+              onChange={(e) => setFormData({ ...formData, padre: e.target.value })}
+              placeholder="Tarea del Backlog educativo"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+            />
+            <textarea
+              value={formData.descripcion}
+              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+              placeholder="Descripción"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+            />
+            <select
+              value={formData.prioridad}
+              onChange={(e) => setFormData({ ...formData, prioridad: e.target.value })}
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+            >
+              <option value="alta">Alta prioridad</option>
+              <option value="media">Media prioridad</option>
+              <option value="baja">Baja prioridad</option>
+            </select>
+            <div className="flex justify-end">
+              <button
+                onClick={agregarTarea}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              >
+                Agregar tarea
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alerta */}
+      {alerta && (
+        <div className="max-w-2xl mx-auto mb-4">
+          <div className="flex items-center justify-between bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md shadow">
+            <p className="text-sm">{alerta}</p>
+            <button
+              onClick={() => setAlerta(null)}
+              className="text-sm font-semibold hover:underline ml-4"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
 
       {/* Tablero */}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -132,11 +177,7 @@ const onDragEnd = (result) => {
                   </h3>
                   <div className="flex-grow space-y-3">
                     {tareas.map((tarea, idx) => (
-                      <Draggable
-                        key={tarea.id}
-                        draggableId={tarea.id}
-                        index={idx}
-                      >
+                      <Draggable key={tarea.id} draggableId={tarea.id} index={idx}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
@@ -167,8 +208,7 @@ const onDragEnd = (result) => {
                                     : "bg-green-100 text-green-700"
                                 }`}
                               >
-                                {tarea.prioridad.charAt(0).toUpperCase() +
-                                  tarea.prioridad.slice(1)}
+                                {tarea.prioridad.charAt(0).toUpperCase() + tarea.prioridad.slice(1)}
                               </span>
                             </div>
                           </div>

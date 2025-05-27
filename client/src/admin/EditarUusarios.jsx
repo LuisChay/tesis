@@ -10,7 +10,7 @@ const EditarUsuarios = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6">
+      <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
           Editar Usuarios
         </h1>
