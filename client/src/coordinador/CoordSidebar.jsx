@@ -25,8 +25,8 @@ const CoordSidebar = () => {
           <Link to="/coordinador/marco" className={linkClass("/coordinador/marco")}>
             Conoce el marco
           </Link>
-          <Link to="/coordinador/backlog" className={linkClass("/coordinador/backlog")}>
-            Backlog Educativo
+          <Link to="/coordinador/actividades" className={linkClass("/coordinador/actividades")}>
+            Actividades del ciclo
           </Link>
           <Link to="/coordinador/evaluacion" className={linkClass("/coordinador/evaluacion")}>
             Evaluación continua

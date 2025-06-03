@@ -10,7 +10,7 @@ const ConoceElMarcoEquipo = () => {
         </h1>
 
         <section className="mb-6 space-y-2">
-          <h2 className="text-xl font-semibold text-blue-700">📘 ¿Qué es el marco ágil Scrum?</h2>
+          <h2 className="text-xl font-semibold text-blue-700">📘 ¿Qué es el marco de ágil educativo?</h2>
           <p className="text-gray-700">
             Scrum es un marco de trabajo que permite organizar el aprendizaje en ciclos cortos llamados <strong>Sprints</strong>. En cada Sprint, el equipo colabora para alcanzar una meta de aprendizaje mediante tareas concretas, reflexión diaria y mejora continua.
           </p>

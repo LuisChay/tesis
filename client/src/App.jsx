@@ -4,7 +4,7 @@ import LandingPage from './common/Landing'
 import LoginPage from './common/Login'
 import ReportesAdmin from './admin/ReportesAdmin'
 import CrearCuenta from './admin/CrearCuenta'
-import EditarUsuarios from './admin/EditarUusarios'
+import EditarUsuarios from './admin/EditarUsuarios'
 import ReportesCoord from './coordinador/ReportesCoord'
 import Backlog from './coordinador/Backlog'
 import KanbanBoard from './equipo/Board'
@@ -30,7 +30,7 @@ function App() {
         <Route path="/admin/crear-cuenta" element={<CrearCuenta />} />
         <Route path="/admin/editar-usuarios" element={<EditarUsuarios />} />
         <Route path="/coordinador/reportes" element={<ReportesCoord />} />
-        <Route path="/coordinador/backlog" element={<Backlog />} />
+        <Route path="/coordinador/actividades" element={<Backlog />} />
         <Route path="/equipo/tablero" element={<KanbanBoard />} />
         <Route path="/equipo/reportes" element={<ReportesEquipo />} />
         <Route path="/admin/proyectos" element={<AdminProyectos />} />

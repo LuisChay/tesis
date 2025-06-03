@@ -10,7 +10,7 @@ const ConoceElMarcoCoordinador = () => {
         </h1>
 
         <section className="mb-6 space-y-2">
-          <h2 className="text-xl font-semibold text-blue-700">📘 ¿Qué es el marco ágil?</h2>
+          <h2 className="text-xl font-semibold text-blue-700">📘 ¿Qué es el marco de ágil educativo?</h2>
           <p className="text-gray-700">
             Esta plataforma utiliza Scrum como marco ágil adaptado al entorno educativo. Su enfoque se basa en ciclos de trabajo cortos (Sprints), planificación colaborativa y mejora continua. Como Coordinador, tienes un rol clave en la planificación pedagógica y la conexión entre los objetivos institucionales y el trabajo del equipo.
           </p>

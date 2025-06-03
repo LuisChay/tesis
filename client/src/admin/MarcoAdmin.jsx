@@ -10,7 +10,7 @@ const ConoceElMarcoAdmin = () => {
         </h1>
 
         <section className="mb-6 space-y-2">
-          <h2 className="text-xl font-semibold text-blue-700">📘 ¿Qué es el marco ágil?</h2>
+          <h2 className="text-xl font-semibold text-blue-700">📘 ¿Qué es el marco de ágil educativo?</h2>
           <p className="text-gray-700">
             Esta plataforma aplica el marco de trabajo Scrum adaptado al contexto educativo. Scrum se basa en ciclos cortos (Sprints), colaboración constante y mejora continua. Cada actor tiene un rol específico que contribuye al logro de objetivos educativos claros.
           </p>
