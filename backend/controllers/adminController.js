@@ -4,7 +4,7 @@ module.exports = (connection) => {
 getProyectos: (req, res) => {
   const sql = `
     SELECT p.id, p.nombre AS titulo, p.objetivos AS objetivo, g.nombre AS grado,
-           u.nombre_completo AS responsable,
+           p.responsable_id, u.nombre_completo AS responsable,
            DATE_FORMAT(p.fecha_inicio, '%Y-%m-%d') AS fechaInicio,
            DATE_FORMAT(p.fecha_fin, '%Y-%m-%d') AS fechaFin
     FROM proyectos p
@@ -21,6 +21,7 @@ getProyectos: (req, res) => {
     res.json(results);
   });
 },
+
 
     // Crear nuevo proyecto
     createProyecto: (req, res) => {

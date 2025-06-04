@@ -68,6 +68,8 @@ CREATE TABLE backlog (
     curso_id INT,
     creado_por INT,
     fecha_creacion DATE,
+    proyecto_id INT,
+    FOREIGN KEY (proyecto_id) REFERENCES proyectos(id),
     FOREIGN KEY (curso_id) REFERENCES grados(id),
     FOREIGN KEY (creado_por) REFERENCES usuarios(id)
 );

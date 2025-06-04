@@ -16,7 +16,11 @@ const rolInverseMap = {
 const EditarUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [editUserId, setEditUserId] = useState(null);
-  const [editData, setEditData] = useState({ nombre_completo: "", correo: "", rol_id: 2 });
+  const [editData, setEditData] = useState({
+    nombre_completo: "",
+    correo: "",
+    rol_id: 2,
+  });
 
   // Cargar usuarios del backend
   useEffect(() => {
@@ -37,7 +41,7 @@ const EditarUsuarios = () => {
     setEditData({
       nombre_completo: user.nombre_completo || user.nombre || "",
       correo: user.correo || "",
-      rol_id: user.rol_id || rolInverseMap[user.rol] || 2,
+      rol_id: user.rol_id || 2,
     });
   };
 
@@ -51,22 +55,21 @@ const EditarUsuarios = () => {
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
- const saveEdit = async () => {
+  const saveEdit = async () => {
     try {
-      // Validar que no se cambie a admin (1)
+      // Si el rol es Administrador, forzamos el rol como 'Administrador' (1)
       if (editData.rol_id === 1) {
-        return Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "No está permitido asignar el rol Administrador",
-        });
+        editData.rol_id = 1; // Forzar rol de admin
       }
 
-      const res = await fetch(`http://localhost:5100/users/update-usuario/${editUserId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
-      });
+      const res = await fetch(
+        `http://localhost:5100/users/update-usuario/${editUserId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
+        }
+      );
 
       const resData = await res.json();
 
@@ -110,7 +113,9 @@ const EditarUsuarios = () => {
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5100/users/delete-usuario/${id}`, { method: "DELETE" });
+      const res = await fetch(`http://localhost:5100/users/delete-usuario/${id}`, {
+        method: "DELETE",
+      });
       const resData = await res.json();
 
       if (!res.ok) throw new Error(resData.error || "No se pudo eliminar el usuario");
@@ -135,107 +140,108 @@ const EditarUsuarios = () => {
   return (
     <AdminLayout>
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Editar Usuarios</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+          Editar Usuarios
+        </h1>
         <div className="overflow-x-auto">
-<table className="w-full table-auto text-sm border-collapse">
-  <thead>
-    <tr className="bg-gray-50 text-left text-gray-600 uppercase text-xs">
-      <th className="px-4 py-2 border-b">Nombre</th>
-      <th className="px-4 py-2 border-b">Correo</th>
-      <th className="px-4 py-2 border-b">Rol</th>
-      <th className="px-4 py-2 border-b">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {usuarios.map((user) => (
-      <tr key={user.id} className="hover:bg-gray-50">
-        <td className="px-4 py-3 border-b font-medium text-gray-800">
-          {editUserId === user.id ? (
-            <input
-              type="text"
-              name="nombre_completo"
-              value={editData.nombre_completo}
-              onChange={handleChange}
-              className="border border-gray-300 rounded px-2 py-1 w-full"
-            />
-          ) : (
-            user.nombre_completo || user.nombre
-          )}
-        </td>
-        <td className="px-4 py-3 border-b">
-          {editUserId === user.id ? (
-            <input
-              type="email"
-              name="correo"
-              value={editData.correo}
-              onChange={handleChange}
-              className="border border-gray-300 rounded px-2 py-1 w-full"
-            />
-          ) : (
-            user.correo
-          )}
-        </td>
-        <td className="px-4 py-3 border-b capitalize text-gray-700">
-          {editUserId === user.id ? (
-            user.rol_id === 1 ? (
-              <span className="font-semibold text-red-600">Administrador</span>
-            ) : (
-              <select
-                name="rol_id"
-                value={editData.rol_id}
-                onChange={handleChange}
-                className="border border-gray-300 rounded px-2 py-1 w-full"
-              >
-                <option value={2}>Coordinador</option>
-                <option value={3}>Profesor</option>
-              </select>
-            )
-          ) : (
-            rolMap[user.rol_id] || user.rol || "coordinador"
-          )}
-        </td>
-        <td className="px-4 py-3 border-b space-x-4">
-          {editUserId === user.id ? (
-            <>
-              <button
-                onClick={saveEdit}
-                className="text-green-600 hover:underline"
-                type="button"
-              >
-                Guardar
-              </button>
-              <button
-                onClick={cancelEdit}
-                className="text-gray-600 hover:underline"
-                type="button"
-              >
-                Cancelar
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => startEdit(user)}
-                className="text-blue-600 hover:underline"
-                type="button"
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => deleteUser(user.id)}
-                className="text-red-600 hover:underline"
-                type="button"
-              >
-                Eliminar
-              </button>
-            </>
-          )}
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+          <table className="w-full table-auto text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-50 text-left text-gray-600 uppercase text-xs">
+                <th className="px-4 py-2 border-b">Nombre</th>
+                <th className="px-4 py-2 border-b">Correo</th>
+                <th className="px-4 py-2 border-b">Rol</th>
+                <th className="px-4 py-2 border-b">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 border-b font-medium text-gray-800">
+                    {editUserId === user.id ? (
+                      <input
+                        type="text"
+                        name="nombre_completo"
+                        value={editData.nombre_completo}
+                        onChange={handleChange}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                      />
+                    ) : (
+                      user.nombre_completo || user.nombre
+                    )}
+                  </td>
+                  <td className="px-4 py-3 border-b">
+                    {editUserId === user.id ? (
+                      <input
+                        type="email"
+                        name="correo"
+                        value={editData.correo}
+                        onChange={handleChange}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                      />
+                    ) : (
+                      user.correo
+                    )}
+                  </td>
+                  <td className="px-4 py-3 border-b capitalize text-gray-700">
+                    {editUserId === user.id ? (
+                      user.rol_id === 1 ? (
+                        <span className="font-semibold text-red-600">Administrador</span>
+                      ) : (
+                        <select
+                          name="rol_id"
+                          value={editData.rol_id}
+                          onChange={handleChange}
+                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                        >
+                          <option value={2}>Coordinador</option>
+                          <option value={3}>Equipo</option>
+                        </select>
+                      )
+                    ) : (
+                      rolMap[user.rol_id] || user.rol || "coordinador"
+                    )}
+                  </td>
+                  <td className="px-4 py-3 border-b space-x-4">
+                    {editUserId === user.id ? (
+                      <>
+                        <button
+                          onClick={saveEdit}
+                          className="text-green-600 hover:underline"
+                          type="button"
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          className="text-gray-600 hover:underline"
+                          type="button"
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => startEdit(user)}
+                          className="text-blue-600 hover:underline"
+                          type="button"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => deleteUser(user.id)}
+                          className="text-red-600 hover:underline"
+                          type="button"
+                        >
+                          Eliminar
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </AdminLayout>

@@ -33,7 +33,7 @@ const EvaluacionContinua = () => {
           <input
             value={form.estudiante}
             onChange={(e) => setForm({ ...form, estudiante: e.target.value })}
-            placeholder="Nombre del estudiante"
+            placeholder="Equipo evaluado"
             className="w-full border rounded px-4 py-2"
           />
           <input

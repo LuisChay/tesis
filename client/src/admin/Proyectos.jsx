@@ -13,9 +13,27 @@ const AdminProyectos = () => {
   const [editGradoId, setEditGradoId] = useState(null);
   const [editGradoNombre, setEditGradoNombre] = useState("");
 
-     const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [formProyecto, setFormProyecto] = useState({
+    titulo: "",
+    objetivo: "",
+    grado: "",
+    responsable: "",
+    fechaInicio: "",
+    fechaFin: "",
+  });
 
-  // Calcular índices para slice
+  const [editProyectoId, setEditProyectoId] = useState(null);
+  const [editProyectoData, setEditProyectoData] = useState({
+    titulo: "",
+    objetivo: "",
+    grado: "",
+    responsable: "",
+    fechaInicio: "",
+    fechaFin: "",
+  });
+
+  // Calcular índices para paginación
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const gradosPaginados = grados.slice(startIndex, endIndex);
@@ -29,21 +47,13 @@ const AdminProyectos = () => {
     setCurrentPage(page);
   };
 
-  const [formProyecto, setFormProyecto] = useState({
-    titulo: "",
-    objetivo: "",
-    grado: "",
-    responsable: "",
-    fechaInicio: "",
-    fechaFin: "",
-  });
-
   useEffect(() => {
     cargarGrados();
     cargarCoordinadores();
     cargarProyectos();
   }, []);
 
+  // Cargar grados desde el backend
   const cargarGrados = () => {
     fetch("http://localhost:5100/admin/get-grados")
       .then((res) => res.json())
@@ -51,6 +61,15 @@ const AdminProyectos = () => {
       .catch(() => Swal.fire("Error", "No se pudieron cargar los grados", "error"));
   };
 
+const formatearFecha = (fecha) => {
+  if (!fecha) return "-";
+  const [year, month, day] = fecha.split("-");
+  const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  return `${day} ${meses[parseInt(month) - 1]} ${year}`;
+};
+
+
+  // Cargar coordinadores desde el backend
   const cargarCoordinadores = () => {
     fetch("http://localhost:5100/users/get-usuarios")
       .then((res) => res.json())
@@ -58,12 +77,22 @@ const AdminProyectos = () => {
       .catch(() => Swal.fire("Error", "No se pudieron cargar los responsables", "error"));
   };
 
-  const cargarProyectos = () => {
-    fetch("http://localhost:5100/admin/get-proyectos")
-      .then((res) => res.json())
-      .then(setProyectos)
-      .catch(() => Swal.fire("Error", "No se pudieron cargar los proyectos", "error"));
-  };
+  // Cargar proyectos desde el backend
+const cargarProyectos = () => {
+  fetch("http://localhost:5100/admin/get-proyectos")
+    .then((res) => res.json())
+    .then((data) => {
+      const proyectosFormateados = data.map(p => ({
+        ...p,
+        fechaInicio: (p.fechaInicio || p.fecha_inicio || "").slice(0, 10),
+        fechaFin: (p.fechaFin || p.fecha_fin || "").slice(0, 10),
+      }));
+      setProyectos(proyectosFormateados);
+      console.log("Proyectos cargados:", proyectosFormateados);
+    })
+    .catch(() => Swal.fire("Error", "No se pudieron cargar los proyectos", "error"));
+};
+
 
   // Crear grado
   const agregarGrado = () => {
@@ -85,19 +114,17 @@ const AdminProyectos = () => {
       .catch((err) => Swal.fire("Error", err.message, "error"));
   };
 
-  // Inicio edición grado
+  // Funciones para manejar la edición de grados
   const iniciarEdicionGrado = (grado) => {
     setEditGradoId(grado.id);
     setEditGradoNombre(grado.nombre);
   };
 
-  // Cancelar edición grado
   const cancelarEdicionGrado = () => {
     setEditGradoId(null);
     setEditGradoNombre("");
   };
 
-  // Guardar edición grado
   const guardarEdicionGrado = () => {
     if (!editGradoNombre.trim()) {
       return Swal.fire("Error", "El nombre del grado no puede estar vacío", "warning");
@@ -117,7 +144,7 @@ const AdminProyectos = () => {
       .catch((err) => Swal.fire("Error", err.message, "error"));
   };
 
-  // Eliminar grado
+  // Función para eliminar grado
   const eliminarGrado = (id) => {
     Swal.fire({
       title: "¿Estás seguro?",
@@ -128,7 +155,6 @@ const AdminProyectos = () => {
       cancelButtonText: "Cancelar",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        console.log("Eliminando grado con ID:", id);
         try {
           const res = await fetch(`http://localhost:5100/admin/delete-grado/${id}`, { method: "DELETE" });
           const data = await res.json();
@@ -143,13 +169,12 @@ const AdminProyectos = () => {
     });
   };
 
-  // Manejo formulario proyecto
+  // Funciones para manejar la edición de proyectos
   const handleChangeProyecto = (e) => {
     const { name, value } = e.target;
     setFormProyecto((f) => ({ ...f, [name]: value }));
   };
 
-  // Crear proyecto
   const agregarProyecto = () => {
     const { titulo, objetivo, grado } = formProyecto;
     if (!titulo.trim() || !objetivo.trim() || !grado) {
@@ -186,62 +211,110 @@ const AdminProyectos = () => {
       .catch((err) => Swal.fire("Error", err.message, "error"));
   };
 
-  // Editar proyecto (modal simple con solo título para demo, se puede mejorar)
-  const editarProyecto = async (proyecto) => {
-    const { value: titulo } = await Swal.fire({
-      title: "Editar Título del proyecto",
-      input: "text",
-      inputLabel: "Título",
-      inputValue: proyecto.titulo,
-      showCancelButton: true,
-      inputValidator: (v) => !v && "El título es obligatorio",
-    });
 
-    if (titulo) {
-      try {
-        const res = await fetch(`http://localhost:5100/admin/update-proyecto/${proyecto.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...proyecto, nombre: titulo }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error actualizando proyecto");
-        Swal.fire("Éxito", "Proyecto actualizado", "success");
-        cargarProyectos();
-      } catch (error) {
-        Swal.fire("Error", error.message, "error");
-      }
-    }
+
+const handleChangeEditProyecto = (e) => {
+  const { name, value } = e.target;
+  setEditProyectoData((prev) => ({
+    ...prev,
+    [name]: value
+  }));
+};
+
+const editarProyecto = async (proyecto) => {
+  const gradoEncontrado = grados.find(g => g.nombre === proyecto.grado);
+  const responsableEncontrado = responsables.find(r => r.nombre_completo === proyecto.responsable);
+
+  setEditProyectoId(proyecto.id);
+  setEditProyectoData({
+    titulo: proyecto.titulo || "",
+    objetivo: proyecto.objetivo || "-",
+    grado: gradoEncontrado?.id?.toString() || "", // ← usamos el ID
+    responsable: responsableEncontrado?.id?.toString() || "",
+    fechaInicio: (proyecto.fechaInicio || proyecto.fecha_inicio || "").slice(0, 10),
+    fechaFin: (proyecto.fechaFin || proyecto.fecha_fin || "").slice(0, 10),
+  });
+};
+
+const guardarEdicionProyecto = async () => {
+  const {
+    titulo,
+    objetivo,
+    grado,
+    responsable,
+    fechaInicio,
+    fechaFin,
+    _original = {}
+  } = editProyectoData;
+
+  if (!titulo.trim()) {
+    return Swal.fire("Error", "El título es obligatorio", "error");
+  }
+
+  const data = {
+    nombre: titulo.trim(),
+    objetivos: objetivo || "-",
+    curso_id: Number(grado || _original.grado),
+    responsable_id: Number(responsable || _original.responsable),
+    fecha_inicio: fechaInicio || _original.fechaInicio,
+    fecha_fin: fechaFin || _original.fechaFin,
+    actividades: "",
   };
 
-  // Eliminar proyecto
-  const eliminarProyecto = (id) => {
-    Swal.fire({
+  try {
+    const res = await fetch(`http://localhost:5100/admin/update-proyecto/${editProyectoId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || "Error al actualizar");
+    Swal.fire("Éxito", "Proyecto actualizado correctamente", "success");
+    setEditProyectoId(null);
+    await cargarProyectos();
+  } catch (error) {
+    Swal.fire("Error", error.message, "error");
+  }
+};
+
+  // Agregar la función para cancelar la edición de un proyecto
+const cancelarEdicionProyecto = () => {
+  setEditProyectoId(null);
+  setEditProyectoData({
+    titulo: "",
+    objetivo: "",
+    grado: "",
+    responsable: "",
+    fechaInicio: "",
+    fechaFin: "",
+  });
+};
+
+
+  const eliminarProyecto = async (id) => {
+    const confirm = await Swal.fire({
       title: "¿Estás seguro?",
       text: "Esta acción eliminará el proyecto permanentemente.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const res = await fetch(`http://localhost:5100/admin/delete-proyecto/${id}`, {
-            method: "DELETE",
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Error eliminando proyecto");
-          Swal.fire("Eliminado", "Proyecto eliminado correctamente", "success");
-          cargarProyectos();
-        } catch (error) {
-          Swal.fire("Error", error.message, "error");
-        }
-      }
     });
 
- 
+    if (confirm.isConfirmed) {
+      try {
+        const res = await fetch(`http://localhost:5100/admin/delete-proyecto/${id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error eliminando proyecto");
+        Swal.fire("Eliminado", "Proyecto eliminado correctamente", "success");
+        cargarProyectos();
+      } catch (error) {
+        Swal.fire("Error", error.message, "error");
+      }
+    }
   };
-
   return (
     <AdminLayout>
       <div className="max-w-5xl mx-auto p-6 space-y-10">
@@ -268,108 +341,105 @@ const AdminProyectos = () => {
           </div>
 
           {/* Tabla grados con paginación */}
-<table className="w-full table-auto text-sm border-t pt-4">
-  <thead>
-    <tr className="text-left bg-gray-100">
-      <th className="py-2 px-3">Nombre</th>
-      <th className="py-2 px-3">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {gradosPaginados.length === 0 ? (
-      <tr>
-        <td colSpan={2} className="text-center py-4 text-gray-500">
-          No hay grados creados aún.
-        </td>
-      </tr>
-    ) : (
-      gradosPaginados.map((grado) => (
-        <tr key={grado.id} className="border-t">
-          <td className="py-2 px-3">
-            {editGradoId === grado.id ? (
-              <input
-                type="text"
-                value={editGradoNombre}
-                onChange={(e) => setEditGradoNombre(e.target.value)}
-                className="w-full border px-2 py-1 rounded"
-              />
-            ) : (
-              grado.nombre
-            )}
-          </td>
-          <td className="py-2 px-3 space-x-3">
-            {editGradoId === grado.id ? (
-              <>
-                <button
-                  onClick={guardarEdicionGrado}
-                  className="text-yellow-600 hover:underline"
-                >
-                  Guardar
-                </button>
-                <button
-                  onClick={cancelarEdicionGrado}
-                  className="text-gray-600 hover:underline"
-                >
-                  Cancelar
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => iniciarEdicionGrado(grado)}
-                  className="text-blue-600 hover:underline"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => eliminarGrado(grado.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Eliminar
-                </button>
-              </>
-            )}
-          </td>
-        </tr>
-      ))
-    )}
-  </tbody>
-</table>
+          <table className="w-full table-auto text-sm border-t pt-4">
+            <thead>
+              <tr className="text-left bg-gray-100">
+                <th className="py-2 px-3">Nombre</th>
+                <th className="py-2 px-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gradosPaginados.length === 0 ? (
+                <tr>
+                  <td colSpan={2} className="text-center py-4 text-gray-500">
+                    No hay grados creados aún.
+                  </td>
+                </tr>
+              ) : (
+                gradosPaginados.map((grado) => (
+                  <tr key={grado.id} className="border-t">
+                    <td className="py-2 px-3">
+                      {editGradoId === grado.id ? (
+                        <input
+                          type="text"
+                          value={editGradoNombre}
+                          onChange={(e) => setEditGradoNombre(e.target.value)}
+                          className="w-full border px-2 py-1 rounded"
+                        />
+                      ) : (
+                        grado.nombre
+                      )}
+                    </td>
+                    <td className="py-2 px-3 space-x-3">
+                      {editGradoId === grado.id ? (
+                        <>
+                          <button
+                            onClick={guardarEdicionGrado}
+                            className="text-yellow-600 hover:underline"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={cancelarEdicionGrado}
+                            className="text-gray-600 hover:underline"
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => iniciarEdicionGrado(grado)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => eliminarGrado(grado.id)}
+                            className="text-red-600 hover:underline"
+                          >
+                            Eliminar
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
 
-{/* Controles de paginación */}
-<div className="flex justify-center space-x-4 mt-4">
-  <button
-    onClick={() => cambiarPagina(currentPage - 1)}
-    disabled={currentPage === 1}
-    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-  >
-    Anterior
-  </button>
-  {Array.from({ length: totalPages }, (_, i) => (
-    <button
-      key={i + 1}
-      onClick={() => cambiarPagina(i + 1)}
-      className={`px-3 py-1 rounded ${
-        currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"
-      }`}
-    >
-      {i + 1}
-    </button>
-  ))}
-  <button
-    onClick={() => cambiarPagina(currentPage + 1)}
-    disabled={currentPage === totalPages}
-    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-  >
-    Siguiente
-  </button>
-</div>
-
-
-          
+          {/* Controles de paginación */}
+          <div className="flex justify-center space-x-4 mt-4">
+            <button
+              onClick={() => cambiarPagina(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => cambiarPagina(i + 1)}
+                className={`px-3 py-1 rounded ${
+                  currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => cambiarPagina(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
 
-        {/* Formulario creación proyecto */}
+        {/* Formulario de creación de proyecto */}
         <div className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-xl font-bold mb-4">Crear nuevo proyecto</h2>
           <input
@@ -392,7 +462,7 @@ const AdminProyectos = () => {
             onChange={handleChangeProyecto}
             className="w-full border px-4 py-2 rounded-md mb-3"
           >
-            <option value="">-- Seleccione grado o área --</option>
+            <option value="">Seleccione grado o área</option>
             {grados.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.nombre}
@@ -405,7 +475,7 @@ const AdminProyectos = () => {
             onChange={handleChangeProyecto}
             className="w-full border px-4 py-2 rounded-md mb-3"
           >
-            <option value="">-- Seleccione responsable --</option>
+            <option value="">Seleccione responsable</option>
             {responsables.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.nombre_completo}
@@ -436,72 +506,143 @@ const AdminProyectos = () => {
           </button>
         </div>
 
-        {/* Tabla proyectos */}
+        {/* Tabla de proyectos */}
         <div className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-xl font-bold mb-4">Proyectos existentes</h2>
-          <table className="w-full table-auto text-sm border-t">
-            <thead>
-              <tr className="text-left bg-gray-100">
-                <th className="py-2 px-3">Título</th>
-                <th className="py-2 px-3">Grado / Área</th>
-                <th className="py-2 px-3">Responsable</th>
-                <th className="py-2 px-3">Fechas</th>
-                <th className="py-2 px-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {proyectos.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">
-                    No hay proyectos creados aún.
-                  </td>
-                </tr>
-              ) : (
-                proyectos.map((p) => (
-                  <tr key={p.id} className="border-t">
-                    <td className="py-2 px-3">{p.titulo}</td>
-                    <td className="py-2 px-3">{p.grado}</td>
-                    <td className="py-2 px-3">{p.responsable || "-"}</td>
-                    <td className="py-2 px-3">
-                      {p.fechaInicio
-                        ? new Date(p.fechaInicio).toLocaleDateString("es-GT", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "-"}{" "}
-                      -{" "}
-                      {p.fechaFin
-                        ? new Date(p.fechaFin).toLocaleDateString("es-GT", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "-"}
-                    </td>
-                    <td className="py-2 px-3 space-x-3">
-                      <button
-                        onClick={() => editarProyecto(p)}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => eliminarProyecto(p.id)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+            <table className="w-full table-auto text-sm border-collapse">
+          <thead>
+            <tr className="bg-gray-50 text-left text-gray-600 uppercase text-xs">
+              <th className="px-4 py-2 border-b">Título</th>
+              <th className="px-4 py-2 border-b">Grado</th>
+              <th className="px-4 py-2 border-b">Responsable</th>
+              <th className="px-4 py-2 border-b">Fechas</th>
+              <th className="px-4 py-2 border-b">Acciones</th>
+            </tr>
+          </thead>
+<tbody>
+  {proyectos.map((proyecto) => (
+    <tr key={proyecto.id} className="hover:bg-gray-50">
+      <td className="px-4 py-3 border-b">
+        {editProyectoId === proyecto.id ? (
+          <input
+            type="text"
+            name="titulo"
+            value={editProyectoData.titulo}
+            onChange={handleChangeEditProyecto}
+            className="border border-gray-300 rounded px-2 py-1 w-full"
+          />
+        ) : (
+          proyecto.titulo
+        )}
+      </td>
+      <td className="px-4 py-3 border-b">
+        {editProyectoId === proyecto.id ? (
+          <select
+            name="grado"
+            value={editProyectoData.grado}
+            onChange={handleChangeEditProyecto}
+            className="border border-gray-300 rounded px-2 py-1 w-full"
+          >
+            <option value="">Seleccionar grado</option>
+            {grados.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.nombre}
+              </option>
+            ))}
+          </select>
+        ) : (
+          proyecto.grado
+        )}
+      </td>
+      <td className="px-4 py-3 border-b">
+        {editProyectoId === proyecto.id ? (
+          <select
+            name="responsable"
+            value={editProyectoData.responsable}
+            onChange={handleChangeEditProyecto}
+            className="border border-gray-300 rounded px-2 py-1 w-full"
+          >
+            <option value="">Seleccionar responsable</option>
+            {responsables.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.nombre_completo}
+              </option>
+            ))}
+          </select>
+        ) : (
+          proyecto.responsable
+        )}
+      </td>
+      <td className="px-4 py-3 border-b">
+        {editProyectoId === proyecto.id ? (
+          <>
+            <input
+              type="date"
+              name="fechaInicio"
+              value={editProyectoData.fechaInicio}
+              onChange={handleChangeEditProyecto}
+              className="border border-gray-300 rounded px-2 py-1 w-full"
+            />
+            <input
+              type="date"
+              name="fechaFin"
+              value={editProyectoData.fechaFin}
+              onChange={handleChangeEditProyecto}
+              className="border border-gray-300 rounded px-2 py-1 w-full mt-2"
+            />
+          </>
+        ) : (
+          <>
+            {formatearFecha(proyecto.fechaInicio)} - {formatearFecha(proyecto.fechaFin)}
+          </>
+        )}
+      </td>
+      <td className="px-4 py-3 border-b space-x-3">
+        {editProyectoId === proyecto.id ? (
+          <>
+            <button
+              onClick={guardarEdicionProyecto}
+              className="text-green-600 hover:underline"
+              type="button"
+            >
+              Guardar
+            </button>
+            <button
+              onClick={cancelarEdicionProyecto}
+              className="text-gray-600 hover:underline"
+              type="button"
+            >
+              Cancelar
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => editarProyecto(proyecto)}
+              className="text-blue-600 hover:underline"
+              type="button"
+            >
+              Editar
+            </button>
+            <button
+              onClick={() => eliminarProyecto(proyecto.id)}
+              className="text-red-600 hover:underline"
+              type="button"
+            >
+              Eliminar
+            </button>
+          </>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
+        </table>
+
         </div>
       </div>
     </AdminLayout>
-  );
-};
-
+  );  
+}
 export default AdminProyectos;
