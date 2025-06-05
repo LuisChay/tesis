@@ -20,7 +20,9 @@ CREATE TABLE usuarios (
     correo VARCHAR(100) UNIQUE,
     contrasena VARCHAR(255),
     rol_id INT,
-    FOREIGN KEY (rol_id) REFERENCES roles(id)
+    curso_id INT,
+    FOREIGN KEY (rol_id) REFERENCES roles(id),
+    FOREIGN KEY (curso_id) REFERENCES grados(id)
 );
 
 -- Tabla de grados
@@ -119,6 +121,7 @@ CREATE TABLE dailys (
     id INT PRIMARY KEY AUTO_INCREMENT,
     fecha DATE,
     usuario_id INT,
+    ayer TEXT,
     avances TEXT,
     bloqueos TEXT,
     sprint_id INT,
@@ -129,16 +132,17 @@ CREATE TABLE dailys (
 -- Tabla de evaluaciones continuas
 CREATE TABLE evaluaciones (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    sprint_id INT,
+    tarea_id INT,  -- Relacionamos la evaluación con una tarea del backlog
     usuario_id INT,
-    nota DECIMAL(4,2),
+    nota DECIMAL(7,2),
     retroalimentacion TEXT,
     evaluado_por INT,
     fecha DATE,
-    FOREIGN KEY (sprint_id) REFERENCES sprints(id),
+    FOREIGN KEY (tarea_id) REFERENCES backlog(id),  -- Relacionada con la tabla tareas (backlog)
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (evaluado_por) REFERENCES usuarios(id)
 );
+
 
 -- Tabla de retrospectivas
 CREATE TABLE retrospectivas (

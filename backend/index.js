@@ -37,9 +37,11 @@ connection.connect((err) => {
 const usuarioRoutes = require('./routes/userRoutes')(connection);
 const adminRoutes = require("./routes/adminRoutes")(connection);
 const coordRoutes = require("./routes/coordRoutes")(connection);
+const equipoRoutes = require("./routes/equipoRoutes")(connection);
 app.use("/admin", adminRoutes);
 app.use('/users', usuarioRoutes);
 app.use('/coord', coordRoutes);
+app.use('/equipo', equipoRoutes);
 
 app.listen(port, () => {
   console.log(`El servidor está corriendo en el puerto ${port}`);

@@ -22,7 +22,8 @@ const EditarUsuarios = () => {
     rol_id: 2,
   });
 
-  // Cargar usuarios del backend
+  const [currentPageUsuarios, setCurrentPageUsuarios] = useState(1);
+
   useEffect(() => {
     fetch("http://localhost:5100/users/get-usuarios")
       .then((res) => res.json())
@@ -57,7 +58,6 @@ const EditarUsuarios = () => {
 
   const saveEdit = async () => {
     try {
-      // Si el rol es Administrador, forzamos el rol como 'Administrador' (1)
       if (editData.rol_id === 1) {
         editData.rol_id = 1; // Forzar rol de admin
       }
@@ -137,6 +137,16 @@ const EditarUsuarios = () => {
     }
   };
 
+  const startIndexUsuarios = (currentPageUsuarios - 1) * 5;
+  const endIndexUsuarios = startIndexUsuarios + 5;
+  const usuariosPaginados = usuarios.slice(startIndexUsuarios, endIndexUsuarios);
+  const totalPagesUsuarios = Math.ceil(usuarios.length / 5);
+
+  const cambiarPaginaUsuarios = (page) => {
+    if (page < 1 || page > totalPagesUsuarios) return;
+    setCurrentPageUsuarios(page);
+  };
+
   return (
     <AdminLayout>
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
@@ -144,9 +154,10 @@ const EditarUsuarios = () => {
           Editar Usuarios
         </h1>
         <div className="overflow-x-auto">
-          <table className="w-full table-auto text-sm border-collapse">
+          <table className="w-full table-auto text-sm border-t pt-4">
             <thead>
-              <tr className="bg-gray-50 text-left text-gray-600 uppercase text-xs">
+                            <tr className="text-left bg-gray-100">
+
                 <th className="px-4 py-2 border-b">Nombre</th>
                 <th className="px-4 py-2 border-b">Correo</th>
                 <th className="px-4 py-2 border-b">Rol</th>
@@ -154,7 +165,7 @@ const EditarUsuarios = () => {
               </tr>
             </thead>
             <tbody>
-              {usuarios.map((user) => (
+              {usuariosPaginados.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 border-b font-medium text-gray-800">
                     {editUserId === user.id ? (
@@ -242,6 +253,29 @@ const EditarUsuarios = () => {
               ))}
             </tbody>
           </table>
+
+          {/* Paginador */}
+          <div className="flex justify-between items-center mt-4">
+            <button
+              onClick={() => cambiarPaginaUsuarios(currentPageUsuarios - 1)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+              disabled={currentPageUsuarios === 1}
+            >
+              Anterior
+            </button>
+
+            <span className="text-sm text-gray-700">
+              Página {currentPageUsuarios} de {totalPagesUsuarios}
+            </span>
+
+            <button
+              onClick={() => cambiarPaginaUsuarios(currentPageUsuarios + 1)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+              disabled={currentPageUsuarios === totalPagesUsuarios}
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       </div>
     </AdminLayout>

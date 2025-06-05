@@ -13,7 +13,9 @@ const AdminProyectos = () => {
   const [editGradoId, setEditGradoId] = useState(null);
   const [editGradoNombre, setEditGradoNombre] = useState("");
 
-  const [currentPage, setCurrentPage] = useState(1);
+const [currentPageGrados, setCurrentPageGrados] = useState(1);  // Paginación para grados
+const [currentPageProyectos, setCurrentPageProyectos] = useState(1);  // Paginación para proyectos
+
   const [formProyecto, setFormProyecto] = useState({
     titulo: "",
     objetivo: "",
@@ -33,19 +35,27 @@ const AdminProyectos = () => {
     fechaFin: "",
   });
 
-  // Calcular índices para paginación
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const gradosPaginados = grados.slice(startIndex, endIndex);
+const startIndexGrados = (currentPageGrados - 1) * ITEMS_PER_PAGE;
+const endIndexGrados = startIndexGrados + ITEMS_PER_PAGE;
+const gradosPaginados = grados.slice(startIndexGrados, endIndexGrados);
+const totalPagesGrados = Math.ceil(grados.length / ITEMS_PER_PAGE);
 
-  // Número total de páginas
-  const totalPages = Math.ceil(grados.length / ITEMS_PER_PAGE);
+const startIndexProyectos = (currentPageProyectos - 1) * ITEMS_PER_PAGE;
+const endIndexProyectos = startIndexProyectos + ITEMS_PER_PAGE;
+const proyectosPaginados = proyectos.slice(startIndexProyectos, endIndexProyectos);
+const totalPagesProyectos = Math.ceil(proyectos.length / ITEMS_PER_PAGE);
 
-  // Función para cambiar página
-  const cambiarPagina = (page) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-  };
+
+
+const cambiarPaginaGrados = (page) => {
+  if (page < 1 || page > totalPagesGrados) return;
+  setCurrentPageGrados(page);
+};
+
+const cambiarPaginaProyectos = (page) => {
+  if (page < 1 || page > totalPagesProyectos) return;
+  setCurrentPageProyectos(page);
+};
 
   useEffect(() => {
     cargarGrados();
@@ -210,8 +220,6 @@ const cargarProyectos = () => {
       })
       .catch((err) => Swal.fire("Error", err.message, "error"));
   };
-
-
 
 const handleChangeEditProyecto = (e) => {
   const { name, value } = e.target;
@@ -410,32 +418,28 @@ const cancelarEdicionProyecto = () => {
           </table>
 
           {/* Controles de paginación */}
-          <div className="flex justify-center space-x-4 mt-4">
-            <button
-              onClick={() => cambiarPagina(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
+          <div className="flex justify-between items-center mt-4">
+
               <button
-                key={i + 1}
-                onClick={() => cambiarPagina(i + 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => cambiarPagina(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Siguiente
-            </button>
+    onClick={() => cambiarPaginaGrados(currentPageGrados - 1)}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+    disabled={currentPageGrados === 1}
+  >
+    Anterior
+  </button>
+
+  <span className="text-sm text-gray-700">
+    Página {currentPageGrados} de {totalPagesGrados}
+  </span>
+
+  <button
+    onClick={() => cambiarPaginaGrados(currentPageGrados + 1)}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+    disabled={currentPageGrados === totalPagesGrados}
+  >
+    Siguiente
+  </button>
+
           </div>
         </div>
 
@@ -511,7 +515,8 @@ const cancelarEdicionProyecto = () => {
           <h2 className="text-xl font-bold mb-4">Proyectos existentes</h2>
             <table className="w-full table-auto text-sm border-collapse">
           <thead>
-            <tr className="bg-gray-50 text-left text-gray-600 uppercase text-xs">
+                          <tr className="text-left bg-gray-100">
+
               <th className="px-4 py-2 border-b">Título</th>
               <th className="px-4 py-2 border-b">Grado</th>
               <th className="px-4 py-2 border-b">Responsable</th>
@@ -520,7 +525,7 @@ const cancelarEdicionProyecto = () => {
             </tr>
           </thead>
 <tbody>
-  {proyectos.map((proyecto) => (
+  {proyectosPaginados.map((proyecto) => (
     <tr key={proyecto.id} className="hover:bg-gray-50">
       <td className="px-4 py-3 border-b">
         {editProyectoId === proyecto.id ? (
@@ -639,6 +644,30 @@ const cancelarEdicionProyecto = () => {
 </tbody>
 
         </table>
+
+        {/* Paginador */}
+<div className="flex justify-between items-center mt-4">
+  <button
+    onClick={() => cambiarPaginaProyectos(currentPageProyectos - 1)}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded"
+    disabled={currentPageProyectos === 1}
+  >
+    Anterior
+  </button>
+
+  <span className="text-sm text-gray-700">
+    Página {currentPageProyectos} de {totalPagesProyectos}
+  </span>
+
+  <button
+    onClick={() => cambiarPaginaProyectos(currentPageProyectos + 1)}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded"
+    disabled={currentPageProyectos === totalPagesProyectos}
+  >
+    Siguiente
+  </button>
+</div>
+
 
         </div>
       </div>

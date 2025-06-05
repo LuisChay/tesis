@@ -10,6 +10,13 @@ module.exports = (connection) => {
   router.put("/update-backlog/:id", coordController.updateBacklog);
   router.delete("/delete-backlog/:id", coordController.deleteBacklog);
   router.get("/get-backlog-by-user/:userId", coordController.getBacklogByUser);
+  router.post("/create-evaluacion", coordController.createEvaluacion);
+  router.get("/get-evaluaciones/:evaluadorId", coordController.getEvaluacionesByEvaluador);
+router.delete("/delete-evaluacion/:id", coordController.deleteEvaluacion);
+router.put("/update-evaluacion/:id", coordController.updateEvaluacion);
+
+
+
 
 
   return router;

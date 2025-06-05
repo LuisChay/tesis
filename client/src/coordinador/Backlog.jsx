@@ -20,6 +20,19 @@ const Backlog = () => {
     proyecto_id: "",
   });
 
+  const [currentPageTareas, setCurrentPageTareas] = useState(1);
+const ITEMS_PER_PAGE = 5; 
+  const startIndexTareas = (currentPageTareas - 1) * ITEMS_PER_PAGE;
+const endIndexTareas = startIndexTareas + ITEMS_PER_PAGE;
+const tareasPaginadas = tareas.slice(startIndexTareas, endIndexTareas);
+const totalPagesTareas = Math.ceil(tareas.length / ITEMS_PER_PAGE);
+// Número de tareas por página
+const cambiarPaginaTareas = (page) => {
+  if (page < 1 || page > totalPagesTareas) return;
+  setCurrentPageTareas(page);
+};
+
+
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const creado_por = usuario?.id;
 
@@ -199,7 +212,7 @@ const startEdit = (tarea) => {
     <CoordinadorLayout>
       <div className="max-w-6xl mx-auto p-6 my-10 space-y-10">
         {/* FORMULARIO DE CREACIÓN */}
-        <div className="bg-white p-6 shadow-md rounded-md border">
+        <div className="bg-white p-6 shadow-md rounded-md">
           <h2 className="text-xl font-bold mb-4 text-gray-800">Crear nueva tarea del backlog</h2>
           <div className="space-y-4">
             <input
@@ -258,12 +271,13 @@ const startEdit = (tarea) => {
         </div>
 
         {/* TABLA DE TAREAS */}
-        <div className="bg-white p-6 shadow-md rounded-md border">
+        <div className="bg-white p-6 shadow-md rounded-md">
           <h2 className="text-xl font-bold mb-4 text-gray-800">Tareas registradas</h2>
           <div className="overflow-x-auto">
             <table className="w-full table-auto text-sm border-collapse">
               <thead>
-                <tr className="bg-gray-100 text-left text-gray-600 uppercase text-xs">
+                              <tr className="text-left bg-gray-100">
+
                   <th className="px-4 py-2 border-b">Título</th>
                   <th className="px-4 py-2 border-b">Descripción</th>
                   <th className="px-4 py-2 border-b">Grado</th>
@@ -271,84 +285,110 @@ const startEdit = (tarea) => {
                   <th className="px-4 py-2 border-b">Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                {tareas.map((tarea) => (
-                  <tr key={tarea.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 border-b">
-                      {editId === tarea.id ? (
-                        <input
-                          type="text"
-                          name="titulo"
-                          value={editData.titulo}
-                          onChange={handleEditChange}
-                          className="w-full border border-gray-300 rounded px-2 py-1"
-                        />
-                      ) : tarea.titulo}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      {editId === tarea.id ? (
-                        <textarea
-                          name="descripcion"
-                          value={editData.descripcion}
-                          onChange={handleEditChange}
-                          className="w-full border border-gray-300 rounded px-2 py-1"
-                        />
-                      ) : tarea.descripcion}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      {editId === tarea.id ? (
-                        <select
-                          name="curso_id"
-                          value={editData.curso_id}
-                          onChange={handleEditChange}
-                          className="w-full border border-gray-300 rounded px-2 py-1"
-                        >
-                          {grados.map((g) => (
-                            <option key={g.id} value={g.id}>
-                              {g.nombre}
-                            </option>
-                          ))}
-                        </select>
-                      ) : tarea.grado || "—"}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      {editId === tarea.id ? (
-                        <select
-                          name="proyecto_id"
-                          value={editData.proyecto_id}
-                          onChange={handleEditChange}
-                          className="w-full border border-gray-300 rounded px-2 py-1"
-                        >
-                          {proyectos.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.titulo}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span>{tarea.proyecto || "—"}</span>
-                      )}
-                    </td>
+<tbody>
+  {tareasPaginadas.map((tarea) => (
+    <tr key={tarea.id} className="hover:bg-gray-50">
+      <td className="px-4 py-2 border-b">
+        {editId === tarea.id ? (
+          <input
+            type="text"
+            name="titulo"
+            value={editData.titulo}
+            onChange={handleEditChange}
+            className="w-full border border-gray-300 rounded px-2 py-1"
+          />
+        ) : tarea.titulo}
+      </td>
+      <td className="px-4 py-2 border-b">
+        {editId === tarea.id ? (
+          <textarea
+            name="descripcion"
+            value={editData.descripcion}
+            onChange={handleEditChange}
+            className="w-full border border-gray-300 rounded px-2 py-1"
+          />
+        ) : tarea.descripcion}
+      </td>
+      <td className="px-4 py-2 border-b">
+        {editId === tarea.id ? (
+          <select
+            name="curso_id"
+            value={editData.curso_id}
+            onChange={handleEditChange}
+            className="w-full border border-gray-300 rounded px-2 py-1"
+          >
+            {grados.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.nombre}
+              </option>
+            ))}
+          </select>
+        ) : tarea.grado || "—"}
+      </td>
+      <td className="px-4 py-2 border-b">
+        {editId === tarea.id ? (
+          <select
+            name="proyecto_id"
+            value={editData.proyecto_id}
+            onChange={handleEditChange}
+            className="w-full border border-gray-300 rounded px-2 py-1"
+          >
+            {proyectos.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.titulo}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span>{tarea.proyecto || "—"}</span>
+        )}
+      </td>
 
-                    <td className="px-4 py-2 border-b space-x-4">
-                      {editId === tarea.id ? (
-                        <>
-                          <button onClick={saveEdit} className="text-green-600 hover:underline">Guardar</button>
-                          <button onClick={cancelEdit} className="text-gray-600 hover:underline">Cancelar</button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => startEdit(tarea)} className="text-blue-600 hover:underline">Editar</button>
-                          <button onClick={() => deleteTarea(tarea.id)} className="text-red-600 hover:underline">Eliminar</button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+      <td className="px-4 py-2 border-b space-x-4">
+        {editId === tarea.id ? (
+          <>
+            <button onClick={saveEdit} className="text-green-600 hover:underline">Guardar</button>
+            <button onClick={cancelEdit} className="text-gray-600 hover:underline">Cancelar</button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => startEdit(tarea)} className="text-blue-600 hover:underline">Editar</button>
+            <button onClick={() => deleteTarea(tarea.id)} className="text-red-600 hover:underline">Eliminar</button>
+          </>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
             </table>
+
+            {/* Paginador para tareas */}
+<div className="flex justify-between items-center mt-4">
+  <button
+    onClick={() => cambiarPaginaTareas(currentPageTareas - 1)}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+    disabled={currentPageTareas === 1}
+  >
+    Anterior
+  </button>
+
+  <span className="text-sm text-gray-700">
+    Página {currentPageTareas} de {totalPagesTareas}
+  </span>
+
+  <button
+    onClick={() => cambiarPaginaTareas(currentPageTareas + 1)}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+    disabled={currentPageTareas === totalPagesTareas}
+  >
+    Siguiente
+  </button>
+</div>
+
           </div>
         </div>
+        
       </div>
     </CoordinadorLayout>
   );
