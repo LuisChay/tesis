@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const AdminSidebar = () => {
   const location = useLocation();
@@ -12,11 +13,28 @@ const AdminSidebar = () => {
         : "text-gray-700 hover:bg-gray-100"
     }`;
 
-  const cerrarSesion = () => {
-    // Aquí puedes limpiar el token y redirigir
-    localStorage.clear(); // o solo removeItem("token") si usas uno
-    navigate("/");
-  };
+const cerrarSesion = () => {
+  Swal.fire({
+    title: "¿Deseas cerrar sesión?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, cerrar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      Swal.fire({
+        icon: "success",
+        title: "Sesión cerrada",
+        showConfirmButton: false,
+        timer: 1200,
+      }).then(() => {
+        navigate("/login");
+      });
+    }
+  });
+};
 
   return (
     <aside className="w-64 bg-white border-r shadow-sm min-h-screen p-6 flex flex-col justify-between">

@@ -212,115 +212,117 @@ const handleEditChange = (e) => {
     </div>
 
     {/* Tabla de evaluaciones registradas */}
-    <div className="bg-white p-6 shadow-md rounded-md mt-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Evaluaciones realizadas</h2>
+    <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Evaluaciones realizadas</h2>
       <div className="overflow-x-auto">
         <table className="w-full table-auto text-sm border-collapse">
-          <thead>
-            <tr className="text-left bg-gray-100">
-              <th className="px-4 py-2 border-b">Estudiante</th>
-              <th className="px-4 py-2 border-b">Tarea</th>
-              <th className="px-4 py-2 border-b">Nota</th>
-              <th className="px-4 py-2 border-b">Retroalimentación</th>
-              <th className="px-4 py-2 border-b">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {evaluacionesPaginadas.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="text-center py-4 text-gray-500">
-                  No hay evaluaciones registradas.
-                </td>
-              </tr>
-            ) : (
-              evaluacionesPaginadas.map((e) => (
-                <tr key={e.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 border-b font-medium text-gray-800">{e.estudiante}</td>
-<td className="px-4 py-3 border-b">
-  {editId === e.id ? (
-    <select
-      name="tarea_id"
-      value={editData.tarea_id}  // Asegúrate de que el valor cargado sea el correcto
-      onChange={handleEditChange}
-      className="border border-gray-300 rounded px-2 py-1 w-full"
-    >
-      <option value="">Selecciona una tarea</option>
-      {tareas.map((t) => (
-        <option key={t.id} value={t.id}>
-          {t.titulo}  {/* Muestra el título de la tarea */}
-        </option>
-      ))}
-    </select>
+        <thead>
+          <tr className="text-left bg-gray-100">
+            <th className="px-4 py-2 border-b">Evaluador</th>
+            <th className="px-4 py-2 border-b">Grado</th>
+            <th className="px-4 py-2 border-b">Actividad</th>
+            <th className="px-4 py-2 border-b">Nota</th>
+            <th className="px-4 py-2 border-b">Retroalimentación</th>
+            <th className="px-4 py-2 border-b">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+  {evaluacionesPaginadas.length === 0 ? (
+    <tr>
+      <td colSpan="6" className="text-center py-4 text-gray-500">
+        No hay evaluaciones registradas.
+      </td>
+    </tr>
   ) : (
-    e.backlog  // Si no está en modo edición, mostramos el nombre de la tarea (backlog)
+    evaluacionesPaginadas.map((e) => (
+      <tr key={e.id} className="hover:bg-gray-50">
+        <td className="px-4 py-3 border-b font-medium text-gray-800">{e.estudiante}</td>
+        <td className="px-4 py-3 border-b text-gray-700">{e.grado || "—"}</td>
+        <td className="px-4 py-3 border-b">
+          {editId === e.id ? (
+            <select
+              name="tarea_id"
+              value={editData.tarea_id}
+              onChange={handleEditChange}
+              className="border border-gray-300 rounded px-2 py-1 w-full"
+            >
+              <option value="">Selecciona una tarea</option>
+              {tareas.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.titulo}
+                </option>
+              ))}
+            </select>
+          ) : (
+            e.backlog
+          )}
+        </td>
+        <td className="px-4 py-3 border-b">
+          {editId === e.id ? (
+            <input
+              type="number"
+              name="nota"
+              value={editData.nota}
+              onChange={handleEditChange}
+              className="border border-gray-300 rounded px-2 py-1 w-full"
+            />
+          ) : (
+            e.nota
+          )}
+        </td>
+        <td className="px-4 py-3 border-b text-gray-600 italic">
+          {editId === e.id ? (
+            <textarea
+              name="retroalimentacion"
+              value={editData.retroalimentacion}
+              onChange={handleEditChange}
+              className="border border-gray-300 rounded px-2 py-1 w-full"
+            />
+          ) : (
+            e.retroalimentacion
+          )}
+        </td>
+        <td className="px-4 py-3 border-b space-x-3">
+          {editId === e.id ? (
+            <>
+              <button
+                onClick={saveEdit}
+                className="text-green-600 hover:underline"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => setEditId(null)}
+                className="text-gray-600 hover:underline"
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => startEdit(e)}
+                className="text-blue-600 hover:underline"
+              >
+                Editar
+              </button>
+              <button
+                onClick={() => eliminarEvaluacion(e.id)}
+                className="text-red-600 hover:underline"
+              >
+                Eliminar
+              </button>
+            </>
+          )}
+        </td>
+      </tr>
+    ))
   )}
-</td>
-                  <td className="px-4 py-3 border-b">
-                    {editId === e.id ? (
-                      <input
-                        type="number"
-                        name="nota"
-                        value={editData.nota}
-                        onChange={handleEditChange}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    ) : (
-                      e.nota
-                    )}
-                  </td>
-                  <td className="px-4 py-3 border-b text-gray-600 italic">
-                    {editId === e.id ? (
-                      <textarea
-                        name="retroalimentacion"
-                        value={editData.retroalimentacion}
-                        onChange={handleEditChange}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    ) : (
-                      e.retroalimentacion
-                    )}
-                  </td>
-                  <td className="px-4 py-3 border-b space-x-3">
-                    {editId === e.id ? (
-                      <>
-                        <button
-                          onClick={saveEdit}
-                          className="text-green-600 hover:underline"
-                        >
-                          Guardar
-                        </button>
-                        <button
-                          onClick={() => setEditId(null)}
-                          className="text-gray-600 hover:underline"
-                        >
-                          Cancelar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => startEdit(e)}
-                          className="text-blue-600 hover:underline"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => eliminarEvaluacion(e.id)}
-                          className="text-red-600 hover:underline"
-                        >
-                          Eliminar
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+</tbody>
 
+        </table>
+
+        
     {/* Paginador para evaluaciones */}
     <div className="flex justify-between items-center mt-4">
       <button
@@ -343,6 +345,9 @@ const handleEditChange = (e) => {
         Siguiente
       </button>
     </div>
+      </div>
+    </div>
+
   </CoordinadorLayout>
 );
 

@@ -60,6 +60,29 @@ module.exports = (connection) => {
       });
     },
 
+    getAllBacklog: (req, res) => {
+  const sql = `
+    SELECT 
+      b.id,
+      b.titulo,
+      b.descripcion,
+      b.curso_id,
+      g.nombre AS grado,
+      p.nombre AS proyecto
+    FROM backlog b
+    LEFT JOIN grados g ON b.curso_id = g.id
+    LEFT JOIN proyectos p ON b.proyecto_id = p.id
+    ORDER BY b.id DESC
+  `;
+
+  connection.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener backlog" });
+    }
+    res.json(results);
+  });
+},
+
     // Crear una nueva tarea (backlog)
     createBacklog: (req, res) => {
       const { titulo, descripcion, curso_id, creado_por, proyecto_id } = req.body;
@@ -156,31 +179,35 @@ module.exports = (connection) => {
     },
 
     // Obtener evaluaciones por evaluador
-    getEvaluacionesByEvaluador: (req, res) => {
-      const { evaluadorId } = req.params;
+getEvaluacionesByEvaluador: (req, res) => {
+  const { evaluadorId } = req.params;
 
-      const sql = `
-        SELECT 
-          e.id, 
-          e.nota, 
-          e.retroalimentacion, 
-          e.fecha,
-          u.nombre_completo AS estudiante,
-          b.titulo AS backlog
-        FROM evaluaciones e
-        LEFT JOIN usuarios u ON e.usuario_id = u.id
-        LEFT JOIN backlog b ON e.tarea_id = b.id
-        WHERE e.evaluado_por = ?
-        ORDER BY e.fecha DESC
-      `;
+  const sql = `
+    SELECT 
+      e.id, 
+      e.nota, 
+      e.retroalimentacion, 
+      e.fecha,
+      u.nombre_completo AS estudiante,
+      b.titulo AS backlog,
+      g.nombre AS grado
+    FROM evaluaciones e
+    LEFT JOIN usuarios u ON e.usuario_id = u.id
+    LEFT JOIN backlog b ON e.tarea_id = b.id
+    LEFT JOIN grados g ON b.curso_id = g.id
+    WHERE e.evaluado_por = ?
+    ORDER BY e.fecha DESC
+  `;
 
-      connection.query(sql, [evaluadorId], (err, results) => {
-        if (err) {
-          return res.status(500).json({ error: "Error al cargar evaluaciones" });
-        }
-        res.json(results);
-      });
-    },
+  connection.query(sql, [evaluadorId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al cargar evaluaciones" });
+    }
+    res.json(results);
+  });
+},
+
+
     deleteEvaluacion: (req, res) => {
   const { id } = req.params;
   const sql = 'DELETE FROM evaluaciones WHERE id = ?';

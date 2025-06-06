@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-
+const verifyToken = require('./controllers/verifyToken');
 const app = express();
 const port = process.env.PORT || 5100;
 
@@ -38,10 +38,11 @@ const usuarioRoutes = require('./routes/userRoutes')(connection);
 const adminRoutes = require("./routes/adminRoutes")(connection);
 const coordRoutes = require("./routes/coordRoutes")(connection);
 const equipoRoutes = require("./routes/equipoRoutes")(connection);
-app.use("/admin", adminRoutes);
+
+app.use("/admin",  adminRoutes);
+app.use("/coord", coordRoutes);
+app.use("/equipo", equipoRoutes);
 app.use('/users', usuarioRoutes);
-app.use('/coord', coordRoutes);
-app.use('/equipo', equipoRoutes);
 
 app.listen(port, () => {
   console.log(`El servidor está corriendo en el puerto ${port}`);

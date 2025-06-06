@@ -93,7 +93,7 @@ CREATE TABLE tareas (
     titulo VARCHAR(100),
     descripcion TEXT,
     prioridad ENUM('alta', 'media', 'baja'),
-    estado ENUM('Por hacer', 'En proceso', 'En revisión', 'Hecho') DEFAULT 'Por hacer',
+    estado ENUM('Por hacer', 'En proceso', 'En revisión', 'Hecho', 'Culminado')DEFAULT 'Por hacer',
     backlog_id INT,
     sprint_id INT,
     asignado_a INT,
@@ -144,15 +144,15 @@ CREATE TABLE evaluaciones (
 );
 
 
--- Tabla de retrospectivas
+--  Tabla de retrospectivas
 CREATE TABLE retrospectivas (
     id INT PRIMARY KEY AUTO_INCREMENT,
     sprint_id INT,
-    equipo_id INT,
+    usuario_id INT,
     puntos_buenos TEXT,
     puntos_mejorar TEXT,
     acciones_mejora TEXT,
     fecha DATE,
     FOREIGN KEY (sprint_id) REFERENCES sprints(id),
-    FOREIGN KEY (equipo_id) REFERENCES equipos(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );

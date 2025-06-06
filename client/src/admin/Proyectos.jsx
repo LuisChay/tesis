@@ -329,7 +329,7 @@ const cancelarEdicionProyecto = () => {
 
         {/* Crear grado y gestión con edición en tabla */}
         <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-bold mb-4">Gestión de grados</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Gestión de grados</h2>
           <div className="flex gap-3 mb-4">
             <input
               type="text"
@@ -445,7 +445,7 @@ const cancelarEdicionProyecto = () => {
 
         {/* Formulario de creación de proyecto */}
         <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-bold mb-4">Crear nuevo proyecto</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Crear nuevo proyecto</h2>
           <input
             name="titulo"
             value={formProyecto.titulo}
@@ -512,7 +512,7 @@ const cancelarEdicionProyecto = () => {
 
         {/* Tabla de proyectos */}
         <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-bold mb-4">Proyectos existentes</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Proyectos existentes</h2>
             <table className="w-full table-auto text-sm border-collapse">
           <thead>
                           <tr className="text-left bg-gray-100">
