@@ -38,7 +38,7 @@ const cerrarSesion = () => {
 
 
   return (
-    <aside className="w-64 bg-white border-r shadow-sm min-h-screen p-6 flex flex-col justify-between">
+<aside className="w-64 bg-white border-r shadow-sm sticky top-0 h-screen p-6 flex flex-col justify-between">
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-8">Equipo</h2>
         <nav className="space-y-3">

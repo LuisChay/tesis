@@ -26,11 +26,11 @@ const ConoceElMarcoAdmin = () => {
         <section className="mb-6 space-y-2">
           <h2 className="text-xl font-semibold text-blue-700">✅ ¿Qué debes hacer?</h2>
           <ul className="list-disc ml-6 text-gray-700 space-y-1 text-sm">
-            <li>📁 Crear y administrar los <strong>proyectos educativos</strong> que servirán como marco de trabajo para cada área o grado.</li>
+            <li>Crear y administrar los <strong>proyectos educativos</strong> que servirán como marco de trabajo para cada área o grado.</li>
             <li>👥 Gestionar los <strong>usuarios y roles</strong> dentro del sistema (asignar coordinadores y docentes).</li>
-            <li>📊 Visualizar <strong>reportes globales</strong> por proyecto, área o Sprint para monitorear avances institucionales.</li>
-            <li>🧭 Promover el cumplimiento del marco ágil en toda la institución (tiempos, reuniones, entregables).</li>
-            <li>🚧 Eliminar <strong>impedimentos organizativos</strong> que interfieran con el trabajo de los equipos.</li>
+            <li>Visualizar <strong>reportes globales</strong> por proyecto, área o Sprint para monitorear avances institucionales.</li>
+            <li>Promover el cumplimiento del marco ágil en toda la institución (tiempos, reuniones, entregables).</li>
+            <li>Eliminar <strong>impedimentos organizativos</strong> que interfieran con el trabajo de los equipos.</li>
           </ul>
         </section>
 

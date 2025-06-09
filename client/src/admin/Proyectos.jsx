@@ -98,7 +98,6 @@ const cargarProyectos = () => {
         fechaFin: (p.fechaFin || p.fecha_fin || "").slice(0, 10),
       }));
       setProyectos(proyectosFormateados);
-      console.log("Proyectos cargados:", proyectosFormateados);
     })
     .catch(() => Swal.fire("Error", "No se pudieron cargar los proyectos", "error"));
 };

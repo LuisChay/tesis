@@ -50,6 +50,10 @@ const ConoceElMarcoEquipo = () => {
             <li>Apertura a la retroalimentación y mejora constante.</li>
           </ul>
         </section>
+
+        <div className="text-sm text-gray-500 mt-10 border-t pt-4">
+          Si tienes dudas sobre tu rol, puedes consultar esta sección en cualquier momento. Tu labor es clave para que el marco ágil funcione en el centro educativo.
+        </div>
       </div>
     </EquipoLayout>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import EquipoLayout from "./EquipoLayout";
 import Swal from "sweetalert2";
+import GradoSelector from "./GradoSelector";
 
 const SprintPlanner = () => {
   const [sprints, setSprints] = useState([]);
@@ -22,6 +23,8 @@ const SprintPlanner = () => {
     curso_id: "",
   });
 
+  const [gradoFiltro, setGradoFiltro] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -33,32 +36,61 @@ const SprintPlanner = () => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
-const formatearFecha = (fecha) => {
-  if (!fecha) return "-";
-  const d = new Date(fecha);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][d.getMonth()];
-  const year = d.getFullYear();
-  return `${day} ${month} ${year}`;
-};
-
-
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "-";
+    const d = new Date(fecha);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = [
+      "ene",
+      "feb",
+      "mar",
+      "abr",
+      "may",
+      "jun",
+      "jul",
+      "ago",
+      "sep",
+      "oct",
+      "nov",
+      "dic",
+    ][d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
 
   useEffect(() => {
-    fetch("http://localhost:5100/admin/get-grados")
+    const usuario_id = JSON.parse(localStorage.getItem("usuario"))?.id;
+    if (!usuario_id) return;
+
+    fetch(`http://localhost:5100/admin/get-grados-usuario/${usuario_id}`)
       .then((res) => res.json())
       .then(setGrados)
-      .catch(() => console.error("Error al cargar grados"));
-
-    fetch("http://localhost:5100/equipo/get-sprints")
-      .then((res) => res.json())
-      .then(setSprints)
-      .catch(() => console.error("Error al cargar sprints"));
+      .catch(() =>
+        Swal.fire("Error", "No se pudieron cargar los grados", "error")
+      );
   }, []);
 
+  useEffect(() => {
+    if (!gradoFiltro) return;
+    fetch(`http://localhost:5100/equipo/get-sprints-grado/${gradoFiltro}`)
+      .then((res) => res.json())
+      .then(setSprints)
+      .catch(() => console.error("Error al cargar sprints filtrados"));
+  }, [gradoFiltro]);
+
   const agregarSprint = async () => {
-    if (!form.nombre || !form.meta || !form.fechaInicio || !form.fechaFin || !form.curso_id) {
-      return Swal.fire("Campos incompletos", "Debes llenar todos los campos", "warning");
+    if (
+      !form.nombre ||
+      !form.meta ||
+      !form.fechaInicio ||
+      !form.fechaFin ||
+      !form.curso_id
+    ) {
+      return Swal.fire(
+        "Campos incompletos",
+        "Debes llenar todos los campos",
+        "warning"
+      );
     }
 
     try {
@@ -71,14 +103,21 @@ const formatearFecha = (fecha) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const gradoNombre = grados.find((g) => g.id === parseInt(form.curso_id))?.nombre || "—";
+      const gradoNombre =
+        grados.find((g) => g.id === parseInt(form.curso_id))?.nombre || "—";
 
       setSprints((prev) => [
         ...prev,
         { ...form, id: data.id, grado: gradoNombre, estado: "Activo" },
       ]);
 
-      setForm({ nombre: "", meta: "", fechaInicio: "", fechaFin: "", curso_id: "" });
+      setForm({
+        nombre: "",
+        meta: "",
+        fechaInicio: "",
+        fechaFin: "",
+        curso_id: "",
+      });
       Swal.fire("Registrado", "Sprint creado correctamente", "success");
     } catch (err) {
       Swal.fire("Error", err.message, "error");
@@ -103,16 +142,20 @@ const formatearFecha = (fecha) => {
 
   const saveEdit = async () => {
     try {
-      const res = await fetch(`http://localhost:5100/equipo/update-sprint/${editId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
-      });
+      const res = await fetch(
+        `http://localhost:5100/equipo/update-sprint/${editId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const gradoNombre = grados.find((g) => g.id === parseInt(editData.curso_id))?.nombre || "—";
+      const gradoNombre =
+        grados.find((g) => g.id === parseInt(editData.curso_id))?.nombre || "—";
 
       setSprints((prev) =>
         prev.map((s) =>
@@ -146,9 +189,12 @@ const formatearFecha = (fecha) => {
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5100/equipo/delete-sprint/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://localhost:5100/equipo/delete-sprint/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -185,7 +231,9 @@ const formatearFecha = (fecha) => {
             <input
               type="date"
               value={form.fechaInicio}
-              onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, fechaInicio: e.target.value })
+              }
               className="w-full border rounded px-4 py-2"
             />
             <input
@@ -219,7 +267,17 @@ const formatearFecha = (fecha) => {
 
       {/* TABLA DE SPRINTS */}
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Sprints creados</h2>
+        <div className="mb-6">
+          <GradoSelector
+            usuarioId={JSON.parse(localStorage.getItem("usuario"))?.id}
+            gradoSeleccionado={gradoFiltro}
+            onSelect={setGradoFiltro}
+          />
+        </div>
+
+        <h2 className="text-xl font-bold text-gray-800 mb-4">
+          Sprints creados
+        </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
@@ -314,19 +372,31 @@ const formatearFecha = (fecha) => {
                     <td className="px-4 py-2 border-b space-x-2">
                       {editId === s.id ? (
                         <>
-                          <button onClick={saveEdit} className="text-green-600 hover:underline">
+                          <button
+                            onClick={saveEdit}
+                            className="text-green-600 hover:underline"
+                          >
                             Guardar
                           </button>
-                          <button onClick={() => setEditId(null)} className="text-gray-600 hover:underline">
+                          <button
+                            onClick={() => setEditId(null)}
+                            className="text-gray-600 hover:underline"
+                          >
                             Cancelar
                           </button>
                         </>
                       ) : (
                         <>
-                          <button onClick={() => startEdit(s)} className="text-blue-600 hover:underline">
+                          <button
+                            onClick={() => startEdit(s)}
+                            className="text-blue-600 hover:underline"
+                          >
                             Editar
                           </button>
-                          <button onClick={() => eliminarSprint(s.id)} className="text-red-600 hover:underline">
+                          <button
+                            onClick={() => eliminarSprint(s.id)}
+                            className="text-red-600 hover:underline"
+                          >
                             Eliminar
                           </button>
                         </>

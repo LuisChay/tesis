@@ -31,6 +31,16 @@ CREATE TABLE grados (
     nombre VARCHAR(100) NOT NULL
 );
 
+-- Tabla de asignación de usuarios a grados
+CREATE TABLE usuario_grado (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    grado_id INT,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (grado_id) REFERENCES grados(id)
+);
+
+
 -- Tabla de proyectos
 CREATE TABLE proyectos (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -53,14 +63,7 @@ CREATE TABLE equipos (
     FOREIGN KEY (curso_id) REFERENCES grados(id)
 );
 
--- Tabla de relación entre usuarios y equipos
-CREATE TABLE equipo_usuarios (
-    equipo_id INT,
-    usuario_id INT,
-    PRIMARY KEY (equipo_id, usuario_id),
-    FOREIGN KEY (equipo_id) REFERENCES equipos(id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-);
+
 
 -- Tabla de backlog educativo
 CREATE TABLE backlog (

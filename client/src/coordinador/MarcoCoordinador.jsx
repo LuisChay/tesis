@@ -20,9 +20,7 @@ const ConoceElMarcoCoordinador = () => {
           <h2 className="text-xl font-semibold text-blue-700">🎯 Tus funciones principales</h2>
           <ul className="list-disc ml-6 text-gray-700 space-y-1 text-sm">
             <li>Definir los objetivos de aprendizaje para cada Sprint.</li>
-            <li>Gestionar el <strong>Backlog Educativo</strong> con tareas claras, asociadas a módulos y cursos.</li>
-            <li>Priorizar las actividades más importantes para que el equipo las desarrolle.</li>
-            <li>Configurar y planificar Sprints semanales.</li>
+            <li>Gestionar las <strong>Actividades del ciclo</strong> con tareas claras, asociadas a los distintos grados.</li>
             <li>Evaluar el trabajo realizado por el equipo mediante retroalimentación continua.</li>
             <li>Consultar reportes del equipo y del avance general.</li>
           </ul>
@@ -44,7 +42,12 @@ const ConoceElMarcoCoordinador = () => {
             <li><strong>Reportes del área:</strong> para consultar el estado de avance por curso o grado.</li>
           </ul>
         </section>
+
+        <div className="text-sm text-gray-500 mt-10 border-t pt-4">
+          Si tienes dudas sobre tu rol, puedes consultar esta sección en cualquier momento. Tu labor es clave para que el marco ágil funcione en el centro educativo.
+        </div>
       </div>
+
     </CoordinadorLayout>
   );
 };

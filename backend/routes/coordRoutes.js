@@ -15,11 +15,20 @@ module.exports = (connection) => {
   // Evaluaciones
   router.post("/create-evaluacion", coordController.createEvaluacion);
   router.get("/get-evaluaciones/:evaluadorId", coordController.getEvaluacionesByEvaluador);
-router.delete("/delete-evaluacion/:id", coordController.deleteEvaluacion);
-router.put("/update-evaluacion/:id", coordController.updateEvaluacion);
+  router.delete("/delete-evaluacion/:id", coordController.deleteEvaluacion);
+  router.put("/update-evaluacion/:id", coordController.updateEvaluacion);
 
+  // Reportes
+  router.get("/reporte-tareas-estado/:coordinador_id", coordController.getTareasPorGradoYEstado);
+  router.get("/reporte-participacion-dailys/:coordinador_id", coordController.getParticipacionDailys);
+  router.get("/reporte-promedio-estudiantes/:coordinador_id", coordController.getPromedioEvaluacionPorGrado);
+  router.get("/reporte-retrospectivas/:coordinador_id", coordController.getRetrospectivasPorSprint);
+  router.get("/reporte-actividad-backlog/:coordinador_id", coordController.getActividadBacklog);
+  router.get("/reporte-ranking-estudiantes/:coordinador_id", coordController.getRankingGrados);
+  router.get("/reporte-participacion-grado", coordController.getParticipacionDailysPorGrado);
 
-
+  router.get("/reporte-cumplimiento-tareas/:coordinador_id", coordController.getCumplimientoTareas);
+  router.get("/reporte-tareas-antiguas/:coordinador_id", coordController.getTareasAntiguasPendientes);
 
 
   return router;

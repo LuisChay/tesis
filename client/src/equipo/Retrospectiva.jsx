@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import EquipoLayout from "./EquipoLayout";
 import Swal from "sweetalert2";
+import GradoSelector from "./GradoSelector";
+
 
 const Retrospectiva = () => {
   const [form, setForm] = useState({
@@ -13,9 +15,12 @@ const Retrospectiva = () => {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const usuario_id = usuario?.id;
 
-  const [sprints, setSprints] = useState([]);
-  const [sprintSeleccionado, setSprintSeleccionado] = useState("");
-  const [gradoActual, setGradoActual] = useState("");
+
+const [gradoFiltro, setGradoFiltro] = useState(""); // para filtrar historial
+const [sprintSeleccionado, setSprintSeleccionado] = useState(""); // sprint elegido en formulario
+const [gradoActual, setGradoActual] = useState(""); // grado del sprint seleccionado
+  const [sprints, setSprints] = useState([]); // todos los sprints para el select
+
   const [retros, setRetros] = useState([]);
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
@@ -31,20 +36,23 @@ const Retrospectiva = () => {
       .catch(() => Swal.fire("Error", "No se pudieron cargar los sprints", "error"));
   }, []);
 
-  useEffect(() => {
-    if (!usuario_id) return;
-    fetch(`http://localhost:5100/equipo/get-retrospectivas/${usuario_id}`)
-      .then((res) => res.json())
-      .then(setRetros)
-      .catch(() => Swal.fire("Error", "No se pudieron cargar las retrospectivas", "error"));
-  }, [usuario_id]);
+useEffect(() => {
+  if (!usuario_id || !gradoFiltro) return;
+  fetch(`http://localhost:5100/equipo/get-retrospectivas-usuario-grado/${usuario_id}/${gradoFiltro}`)
+    .then((res) => res.json())
+    .then(setRetros)
+    .catch(() => Swal.fire("Error", "No se pudieron cargar las retrospectivas", "error"));
+}, [usuario_id, gradoFiltro]);
 
-  const handleSprintChange = (e) => {
-    const id = e.target.value;
-    setSprintSeleccionado(id);
-    const sprint = sprints.find((s) => s.id === Number(id));
-    setGradoActual(sprint?.grado || "—");
-  };
+
+
+const handleSprintChange = (e) => {
+  const id = e.target.value;
+  setSprintSeleccionado(id);
+  const sprint = sprints.find((s) => s.id === Number(id));
+  setGradoActual(sprint?.grado || "—");
+};
+
 
   const formatearFecha = (fecha) => {
   if (!fecha) return "-";
@@ -56,35 +64,35 @@ const Retrospectiva = () => {
 };
 
 
-  const guardar = () => {
-    if (!form.puntos_buenos || !form.puntos_mejorar || !form.acciones_mejora || !sprintSeleccionado) {
-      Swal.fire("Completa todos los campos", "", "warning");
-      return;
-    }
+const guardar = () => {
+  if (!form.puntos_buenos || !form.puntos_mejorar || !form.acciones_mejora || !sprintSeleccionado) {
+    Swal.fire("Completa todos los campos", "", "warning");
+    return;
+  }
 
-    fetch("http://localhost:5100/equipo/create-retro", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        sprint_id: sprintSeleccionado,
-        usuario_id,
-      }),
+  fetch("http://localhost:5100/equipo/create-retrospectiva", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...form,
+      sprint_id: sprintSeleccionado,
+      usuario_id,
+    }),
+  })
+    .then((res) => res.json())
+    .then(() => {
+      Swal.fire("Guardado", "Retrospectiva guardada", "success");
+      setForm({
+        puntos_buenos: "",
+        puntos_mejorar: "",
+        acciones_mejora: "",
+        fecha: new Date().toISOString().split("T")[0],
+      });
+      return fetch(`http://localhost:5100/equipo/get-retrospectivas-usuario-grado/${usuario_id}/${gradoFiltro}`);
     })
-      .then((res) => res.json())
-      .then(() => {
-        Swal.fire("Guardado", "Retrospectiva guardada", "success");
-        setForm({
-          puntos_buenos: "",
-          puntos_mejorar: "",
-          acciones_mejora: "",
-          fecha: new Date().toISOString().split("T")[0],
-        });
-        return fetch(`http://localhost:5100/equipo/get-retrospectivas/${usuario_id}`);
-      })
-      .then((res) => res.json())
-      .then(setRetros);
-  };
+    .then((res) => res.json())
+    .then(setRetros);
+};
 
   const startEdit = (r) => {
     setEditId(r.id);
@@ -132,7 +140,7 @@ const Retrospectiva = () => {
       confirmButtonText: "Sí, eliminar",
     }).then((res) => {
       if (res.isConfirmed) {
-        fetch(`http://localhost:5100/equipo/delete-retro/${id}`, { method: "DELETE" })
+        fetch(`http://localhost:5100/equipo/delete-retrospectiva/${id}`, { method: "DELETE" })
           .then(() => {
             setRetros(retros.filter((r) => r.id !== id));
             Swal.fire("Eliminado", "", "success");
@@ -148,24 +156,24 @@ const Retrospectiva = () => {
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Registrar Retrospectiva</h1>
           <div className="grid gap-4">
-            <select
-              className="border px-3 py-2 rounded"
-              value={sprintSeleccionado}
-              onChange={handleSprintChange}
-            >
-              <option value="">Selecciona un sprint</option>
-              {sprints.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nombre}
-                </option>
-              ))}
-            </select>
+<select
+  className="border px-3 py-2 rounded"
+  value={sprintSeleccionado}
+  onChange={handleSprintChange}
+>
+  <option value="">Selecciona un sprint</option>
+  {sprints.map((s) => (
+    <option key={s.id} value={s.id}>
+      {s.nombre}
+    </option>
+  ))}
+</select>
+{gradoActual && (
+  <p className="text-sm text-gray-700 italic">
+    Grado asignado: <strong>{gradoActual}</strong>
+  </p>
+)}
 
-            {gradoActual && (
-              <p className="text-sm text-gray-700 italic">
-                Grado asignado: <strong>{gradoActual}</strong>
-              </p>
-            )}
 
             <input
               type="date"
@@ -203,6 +211,14 @@ const Retrospectiva = () => {
 
         {/* TABLA */}
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
+
+<GradoSelector
+  usuarioId={usuario_id}
+  gradoSeleccionado={gradoFiltro}
+  onSelect={setGradoFiltro}
+/>
+
+
           <h2 className="text-xl font-bold mb-4 text-gray-800">Historial de Retrospectivas</h2>
           <div className="overflow-x-auto">
             <table className="w-full table-auto text-sm border-collapse">

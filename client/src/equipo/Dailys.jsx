@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import EquipoLayout from "./EquipoLayout";
 import Swal from "sweetalert2";
+import GradoSelector from "./GradoSelector";
 
 const DailyEntry = () => {
   const [entradas, setEntradas] = useState([]);
@@ -18,6 +19,10 @@ const DailyEntry = () => {
 
   const [sprints, setSprints] = useState([]);
   const [sprint_id, setSprintId] = useState("");
+  const [gradoActual, setGradoActual] = useState(""); // mostrar nombre del grado del sprint seleccionado
+
+  const [gradoFiltro, setGradoFiltro] = useState(""); // Para filtrar las entradas
+  const [gradoFormulario, setGradoFormulario] = useState(""); // Para cargar sprints al agregar
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
@@ -31,15 +36,61 @@ const DailyEntry = () => {
     setCurrentPage(page);
   };
 
-
   const formatearFecha = (fecha) => {
-  if (!fecha) return "-";
-  const d = new Date(fecha);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][d.getMonth()];
-  const year = d.getFullYear();
-  return `${day} ${month} ${year}`;
-};
+    if (!fecha) return "-";
+    const d = new Date(fecha);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = [
+      "ene",
+      "feb",
+      "mar",
+      "abr",
+      "may",
+      "jun",
+      "jul",
+      "ago",
+      "sep",
+      "oct",
+      "nov",
+      "dic",
+    ][d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  useEffect(() => {
+    if (!gradoFormulario) return;
+
+    fetch(`http://localhost:5100/equipo/get-sprints-grado/${gradoFormulario}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSprints(data);
+        if (data.length > 0) {
+          setSprintId(data[0].id);
+          setGradoActual(data[0].grado || "—");
+        }
+      })
+      .catch(() =>
+        Swal.fire(
+          "Error",
+          "No se pudieron cargar los sprints del grado",
+          "error"
+        )
+      );
+  }, [gradoFormulario]);
+
+  useEffect(() => {
+    if (usuario_id && gradoFiltro) {
+      fetch(
+        `http://localhost:5100/equipo/get-dailys-usuario-grado/${usuario_id}/${gradoFiltro}`
+      )
+        .then((res) => res.json())
+        .then(setEntradas)
+        .catch(() =>
+          Swal.fire("Error", "No se pudieron cargar las entradas", "error")
+        );
+    }
+  }, [usuario_id, gradoFiltro]);
 
   useEffect(() => {
     fetch("http://localhost:5100/equipo/get-sprints")
@@ -48,21 +99,24 @@ const DailyEntry = () => {
         setSprints(data);
         if (data.length > 0) setSprintId(data[0].id);
       })
-      .catch(() => Swal.fire("Error", "No se pudieron cargar los sprints", "error"));
+      .catch(() =>
+        Swal.fire("Error", "No se pudieron cargar los sprints", "error")
+      );
   }, []);
 
   useEffect(() => {
-    if (usuario_id) {
-      fetch(`http://localhost:5100/equipo/get-dailys/${usuario_id}`)
-        .then((res) => res.json())
-        .then(setEntradas)
-        .catch(() => Swal.fire("Error", "No se pudieron cargar las entradas", "error"));
+    if (!gradoFormulario && gradoFiltro) {
+      setGradoFormulario(gradoFiltro);
     }
-  }, [usuario_id]);
+  }, [gradoFiltro, gradoFormulario]);
 
   const agregarEntrada = async () => {
     if (!form.ayer || !form.avances || !form.bloqueos || !sprint_id) {
-      return Swal.fire("Campos incompletos", "Llena todos los campos", "warning");
+      return Swal.fire(
+        "Campos incompletos",
+        "Llena todos los campos",
+        "warning"
+      );
     }
 
     try {
@@ -79,9 +133,16 @@ const DailyEntry = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const nuevasEntradas = await fetch(`http://localhost:5100/equipo/get-dailys/${usuario_id}`).then((res) => res.json());
+      const nuevasEntradas = await fetch(
+        `http://localhost:5100/equipo/get-dailys/${usuario_id}`
+      ).then((res) => res.json());
       setEntradas(nuevasEntradas);
-      setForm({ ayer: "", avances: "", bloqueos: "", fecha: new Date().toISOString().split("T")[0] });
+      setForm({
+        ayer: "",
+        avances: "",
+        bloqueos: "",
+        fecha: new Date().toISOString().split("T")[0],
+      });
 
       Swal.fire("Guardado", "Entrada diaria registrada", "success");
     } catch (err) {
@@ -108,16 +169,21 @@ const DailyEntry = () => {
 
   const saveEdit = async () => {
     try {
-      const res = await fetch(`http://localhost:5100/equipo/update-daily/${editId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
-      });
+      const res = await fetch(
+        `http://localhost:5100/equipo/update-daily/${editId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const nuevasEntradas = await fetch(`http://localhost:5100/equipo/get-dailys/${usuario_id}`).then((res) => res.json());
+      const nuevasEntradas = await fetch(
+        `http://localhost:5100/equipo/get-dailys/${usuario_id}`
+      ).then((res) => res.json());
       setEntradas(nuevasEntradas);
       setEditId(null);
       Swal.fire("Actualizado", "Entrada modificada correctamente", "success");
@@ -138,9 +204,12 @@ const DailyEntry = () => {
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5100/equipo/delete-daily/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://localhost:5100/equipo/delete-daily/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -155,19 +224,34 @@ const DailyEntry = () => {
   return (
     <EquipoLayout>
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Reunión diaria (Daily)</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+          Reunión diaria (Daily)
+        </h1>
 
         <div className="space-y-4 mb-8">
           <select
             value={sprint_id}
-            onChange={(e) => setSprintId(e.target.value)}
+            onChange={(e) => {
+              const id = e.target.value;
+              setSprintId(id);
+              const sprint = sprints.find((s) => s.id === Number(id));
+              setGradoActual(sprint?.grado || "—");
+            }}
             className="w-full border rounded px-4 py-2"
           >
             <option value="">Selecciona un sprint</option>
             {sprints.map((s) => (
-              <option key={s.id} value={s.id}>{s.nombre}</option>
+              <option key={s.id} value={s.id}>
+                {s.nombre}
+              </option>
             ))}
           </select>
+
+          {gradoActual && (
+            <p className="text-sm text-gray-700 italic">
+              Grado asignado: <strong>{gradoActual}</strong>
+            </p>
+          )}
 
           <input
             type="date"
@@ -197,7 +281,10 @@ const DailyEntry = () => {
             className="w-full border rounded px-4 py-2"
           />
 
-          <button onClick={agregarEntrada} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button
+            onClick={agregarEntrada}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
             Guardar entrada
           </button>
         </div>
@@ -205,14 +292,22 @@ const DailyEntry = () => {
 
       {/* TABLA DE ENTRADAS */}
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
-        <h2 className="text-lg font-semibold mb-4">Entradas registradas</h2>
+        <div className="mb-4">
+          <GradoSelector
+            usuarioId={usuario_id}
+            gradoSeleccionado={gradoFiltro}
+            onSelect={setGradoFiltro}
+          />
+        </div>
+
+        <h2 className="text-lg font-semibold mb-4">Dailys registradas</h2>
         <div className="overflow-x-auto">
           <table className="w-full table-auto text-sm border-collapse">
             <thead>
               <tr className="text-left bg-gray-100">
                 <th className="px-4 py-2 border-b">Fecha</th>
                 <th className="px-4 py-2 border-b">Grado</th>
-
+                <th className="px-4 py-2 border-b">Sprint</th>
                 <th className="px-4 py-2 border-b">Ayer</th>
                 <th className="px-4 py-2 border-b">Avances</th>
                 <th className="px-4 py-2 border-b">Bloqueos</th>
@@ -223,39 +318,54 @@ const DailyEntry = () => {
               {entradasPaginadas.map((e) => (
                 <tr key={e.id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 border-b">
-  {editId === e.id ? (
-    <input
-      type="date"
-      name="fecha"
-      value={editData.fecha}
-      onChange={handleEditChange}
-      className="w-full border rounded px-2 py-1"
-    />
-  ) : (
-    formatearFecha(e.fecha)
-  )}
-</td>
+                    {editId === e.id ? (
+                      <input
+                        type="date"
+                        name="fecha"
+                        value={editData.fecha}
+                        onChange={handleEditChange}
+                        className="w-full border rounded px-2 py-1"
+                      />
+                    ) : (
+                      formatearFecha(e.fecha)
+                    )}
+                  </td>
+
+                  <td className="px-4 py-2 border-b">{e.grado}</td>
+                  <td className="px-4 py-2 border-b">{e.sprint}</td>
 
                   <td className="px-4 py-2 border-b">
-                    {e.grado}
-                  </td>
-                  <td className="px-4 py-2 border-b">
                     {editId === e.id ? (
-                      <textarea name="ayer" value={editData.ayer} onChange={handleEditChange} className="w-full border rounded px-2" />
+                      <textarea
+                        name="ayer"
+                        value={editData.ayer}
+                        onChange={handleEditChange}
+                        className="w-full border rounded px-2"
+                      />
                     ) : (
                       e.ayer
                     )}
                   </td>
                   <td className="px-4 py-2 border-b">
                     {editId === e.id ? (
-                      <textarea name="avances" value={editData.avances} onChange={handleEditChange} className="w-full border rounded px-2" />
+                      <textarea
+                        name="avances"
+                        value={editData.avances}
+                        onChange={handleEditChange}
+                        className="w-full border rounded px-2"
+                      />
                     ) : (
                       e.avances
                     )}
                   </td>
                   <td className="px-4 py-2 border-b">
                     {editId === e.id ? (
-                      <textarea name="bloqueos" value={editData.bloqueos} onChange={handleEditChange} className="w-full border rounded px-2" />
+                      <textarea
+                        name="bloqueos"
+                        value={editData.bloqueos}
+                        onChange={handleEditChange}
+                        className="w-full border rounded px-2"
+                      />
                     ) : (
                       e.bloqueos
                     )}
@@ -263,13 +373,33 @@ const DailyEntry = () => {
                   <td className="px-4 py-2 border-b space-x-2">
                     {editId === e.id ? (
                       <>
-                        <button onClick={saveEdit} className="text-green-600 hover:underline">Guardar</button>
-                        <button onClick={() => setEditId(null)} className="text-gray-600 hover:underline">Cancelar</button>
+                        <button
+                          onClick={saveEdit}
+                          className="text-green-600 hover:underline"
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          onClick={() => setEditId(null)}
+                          className="text-gray-600 hover:underline"
+                        >
+                          Cancelar
+                        </button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => startEdit(e)} className="text-blue-600 hover:underline">Editar</button>
-                        <button onClick={() => eliminarEntrada(e.id)} className="text-red-600 hover:underline">Eliminar</button>
+                        <button
+                          onClick={() => startEdit(e)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => eliminarEntrada(e.id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Eliminar
+                        </button>
                       </>
                     )}
                   </td>
@@ -288,7 +418,9 @@ const DailyEntry = () => {
           >
             Anterior
           </button>
-          <span className="text-sm text-gray-700">Página {currentPage} de {totalPages}</span>
+          <span className="text-sm text-gray-700">
+            Página {currentPage} de {totalPages}
+          </span>
           <button
             onClick={() => cambiarPagina(currentPage + 1)}
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"

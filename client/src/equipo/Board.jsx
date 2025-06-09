@@ -5,6 +5,7 @@ import {
   Droppable,
   Draggable,
 } from "@hello-pangea/dnd";
+import GradoSelector from "./GradoSelector";
 
 const columnasIniciales = {
   "Por hacer": [],
@@ -67,10 +68,6 @@ useEffect(() => {
           nuevasColumnas[t.estado].push(t);
         }
       });
-
-      console.log("Tareas recibidas del backend:", tareas);
-      console.log("Columnas construidas:", nuevasColumnas);
-
       setColumnas(nuevasColumnas);
     })
     .catch(() => console.error("Error al cargar tareas"));
@@ -228,25 +225,21 @@ const columnasFiltradas = Object.fromEntries(
     onClick={() => setMostrarModal(true)}
     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
   >
-    ➕ Nueva tarea
+    Nueva tarea
   </button>
 
-  <select
-    value={gradoSeleccionado}
-    onChange={(e) => setGradoSeleccionado(e.target.value)}
-    className="w-64 border border-gray-300 rounded px-4 py-2"
-  >
-    <option value="">Filtrar por grado</option>
-    {grados.map((g) => (
-      <option key={g.id} value={g.id}>{g.nombre}</option>
-    ))}
-  </select>
+<GradoSelector
+  usuarioId={JSON.parse(localStorage.getItem("usuario"))?.id}
+  gradoSeleccionado={gradoSeleccionado}
+  onSelect={setGradoSeleccionado}
+/>
+
 </div>
 
 
       {/* Modal */}
 {mostrarModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+<div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-[9999]">
     <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg space-y-4 relative">
       <button
         onClick={() => setMostrarModal(false)}

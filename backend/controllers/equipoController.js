@@ -1,5 +1,6 @@
 module.exports = (connection) => {
   return {
+    // SPRINTS
     // Obtener todos los sprints
     getSprints: (req, res) => {
       const sql = `
@@ -18,44 +19,43 @@ module.exports = (connection) => {
       connection.query(sql, (err, results) => {
         if (err) {
           console.error("Error al obtener los sprints:", err);
-          return res.status(500).json({ error: "Error al obtener los sprints" });
+          return res
+            .status(500)
+            .json({ error: "Error al obtener los sprints" });
         }
         res.json(results);
       });
     },
 
     // Crear un nuevo sprint
-createSprint: (req, res) => {
-  const { nombre, fechaInicio, fechaFin, meta, curso_id } = req.body;
-  console.log("nombre:", nombre);
-  console.log("fechaInicio:", fechaInicio);
-  console.log("fechaFin:", fechaFin);
-  console.log("meta:", meta);
-  console.log("curso_id:", curso_id);
+    createSprint: (req, res) => {
+      const { nombre, fechaInicio, fechaFin, meta, curso_id } = req.body;
+      // Validación básica
+      if (!nombre || !fechaInicio || !fechaFin || !curso_id) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
 
-  // Validación básica
-  if (!nombre || !fechaInicio || !fechaFin || !curso_id) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
-
-  const sql = `
+      const sql = `
     INSERT INTO sprints (nombre, fecha_inicio, fecha_fin, objetivo, curso_id)
     VALUES (?, ?, ?, ?, ?)
   `;
 
-  connection.query(
-    sql,
-    [nombre, fechaInicio, fechaFin, meta, curso_id],
-    (err, result) => {
-      if (err) {
-        console.error("Error al crear el sprint:", err);
-        return res.status(500).json({ error: "Error al crear el sprint" });
-      }
+      connection.query(
+        sql,
+        [nombre, fechaInicio, fechaFin, meta, curso_id],
+        (err, result) => {
+          if (err) {
+            console.error("Error al crear el sprint:", err);
+            return res.status(500).json({ error: "Error al crear el sprint" });
+          }
 
-      res.status(201).json({ id: result.insertId, message: "Sprint creado correctamente" });
-    }
-  );
-},
+          res.status(201).json({
+            id: result.insertId,
+            message: "Sprint creado correctamente",
+          });
+        }
+      );
+    },
 
     // Cerrar un sprint
     closeSprint: (req, res) => {
@@ -77,111 +77,141 @@ createSprint: (req, res) => {
       });
     },
     // Actualizar un sprint
-updateSprint: (req, res) => {
-  const { id } = req.params;
-  const { nombre, fechaInicio, fechaFin, meta, curso_id } = req.body;
+    updateSprint: (req, res) => {
+      const { id } = req.params;
+      const { nombre, fechaInicio, fechaFin, meta, curso_id } = req.body;
 
-  if (!nombre || !fechaInicio || !fechaFin || !curso_id) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
+      if (!nombre || !fechaInicio || !fechaFin || !curso_id) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
 
-  const sql = `
+      const sql = `
     UPDATE sprints
     SET nombre = ?, fecha_inicio = ?, fecha_fin = ?, objetivo = ?, curso_id = ?
     WHERE id = ?
   `;
 
-  connection.query(sql, [nombre, fechaInicio, fechaFin, meta, curso_id, id], (err) => {
-    if (err) {
-      console.error("Error al actualizar el sprint:", err);
-      return res.status(500).json({ error: "Error al actualizar el sprint" });
-    }
+      connection.query(
+        sql,
+        [nombre, fechaInicio, fechaFin, meta, curso_id, id],
+        (err) => {
+          if (err) {
+            console.error("Error al actualizar el sprint:", err);
+            return res
+              .status(500)
+              .json({ error: "Error al actualizar el sprint" });
+          }
 
-    res.json({ message: "Sprint actualizado correctamente" });
-  });
-},
+          res.json({ message: "Sprint actualizado correctamente" });
+        }
+      );
+    },
 
-// Eliminar un sprint
-deleteSprint: (req, res) => {
-  const { id } = req.params;
+    // Eliminar un sprint
+    deleteSprint: (req, res) => {
+      const { id } = req.params;
 
-  const sql = `DELETE FROM sprints WHERE id = ?`;
+      const sql = `DELETE FROM sprints WHERE id = ?`;
 
-  connection.query(sql, [id], (err) => {
-    if (err) {
-      console.error("Error al eliminar el sprint:", err);
-      return res.status(500).json({ error: "Error al eliminar el sprint" });
-    }
+      connection.query(sql, [id], (err) => {
+        if (err) {
+          console.error("Error al eliminar el sprint:", err);
+          return res.status(500).json({ error: "Error al eliminar el sprint" });
+        }
 
-    res.json({ message: "Sprint eliminado correctamente" });
-  });
-},
-
+        res.json({ message: "Sprint eliminado correctamente" });
+      });
+    },
 
     // DAILYS
-      // Obtener todos los sprints por grado
-getSprintsByGrado: (req, res) => {
-  const { grado_id } = req.params;
-
-  const sql = `
-    SELECT 
-      s.id, 
-      s.nombre, 
-      s.fecha_inicio, 
-      s.fecha_fin, 
-      s.objetivo,
-      s.curso_id,
-      g.nombre AS grado
+    // Obtener todos los sprints por grado
+    getSprintsByGrado: (req, res) => {
+      const { grado_id } = req.params;
+      const sql = `
+    SELECT s.*, g.nombre AS grado
     FROM sprints s
     LEFT JOIN grados g ON s.curso_id = g.id
-    WHERE g.id = ?
+    WHERE s.curso_id = ?
     ORDER BY s.fecha_inicio DESC
   `;
 
-  connection.query(sql, [grado_id], (err, results) => {
-    if (err) {
-      console.error("Error al obtener los sprints:", err);
-      return res.status(500).json({ error: "Error al obtener los sprints" });
-    }
-    res.json(results);
-  });
-},
+      connection.query(sql, [grado_id], (err, results) => {
+        if (err) {
+          console.error("Error al obtener sprints por grado:", err);
+          return res.status(500).json({ error: "Error al obtener sprints" });
+        }
+        res.json(results);
+      });
+    },
 
+    getSprintsPorGrado: (req, res) => {
+      const { grado_id } = req.params;
+
+      const sql = `
+    SELECT id, nombre
+    FROM sprints
+    WHERE curso_id = ?
+    ORDER BY fecha_inicio DESC
+  `;
+
+      connection.query(sql, [grado_id], (err, results) => {
+        if (err) {
+          console.error("Error al obtener sprints por grado:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al obtener sprints por grado" });
+        }
+        res.json(results);
+      });
+    },
+
+    // DAILYS
     // Crear una nueva entrada en Dailys con validación del grado
-createDaily: (req, res) => {
-  const { fecha, usuario_id, ayer, avances, bloqueos, sprint_id } = req.body;
-  
-  console.log("body:", req.body);  // Verifica los datos recibidos
-  
-  // Validación de campos obligatorios
-  if (!fecha || !usuario_id || !ayer || !avances || !bloqueos || !sprint_id) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
+    createDaily: (req, res) => {
+      const { fecha, usuario_id, ayer, avances, bloqueos, sprint_id } =
+        req.body;
 
-  // Crear la entrada diaria sin validar el grado
-  const sql = `
+      // Validación de campos obligatorios
+      if (
+        !fecha ||
+        !usuario_id ||
+        !ayer ||
+        !avances ||
+        !bloqueos ||
+        !sprint_id
+      ) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
+
+      // Crear la entrada diaria sin validar el grado
+      const sql = `
     INSERT INTO dailys (fecha, usuario_id, ayer, avances, bloqueos, sprint_id)
     VALUES (?, ?, ?, ?, ?, ?)
   `;
-  
-  connection.query(
-    sql,
-    [fecha, usuario_id, ayer, avances, bloqueos, sprint_id],
-    (err, result) => {
-      if (err) {
-        console.error("Error al crear la entrada diaria:", err);
-        return res.status(500).json({ error: "Error al crear la entrada diaria" });
-      }
-      res.status(201).json({ id: result.insertId, message: "Entrada diaria registrada correctamente" });
-    }
-  );
-},
+
+      connection.query(
+        sql,
+        [fecha, usuario_id, ayer, avances, bloqueos, sprint_id],
+        (err, result) => {
+          if (err) {
+            console.error("Error al crear la entrada diaria:", err);
+            return res
+              .status(500)
+              .json({ error: "Error al crear la entrada diaria" });
+          }
+          res.status(201).json({
+            id: result.insertId,
+            message: "Entrada diaria registrada correctamente",
+          });
+        }
+      );
+    },
 
     // Obtener las entradas de Dailys por usuario
-getDailysByUsuario: (req, res) => {
-  const { usuario_id } = req.params;
+    getDailysByUsuario: (req, res) => {
+      const { usuario_id } = req.params;
 
-  const sql = `
+      const sql = `
     SELECT d.id, d.fecha, d.ayer, d.avances, d.bloqueos, g.nombre AS grado
     FROM dailys d
     LEFT JOIN sprints s ON d.sprint_id = s.id
@@ -190,41 +220,60 @@ getDailysByUsuario: (req, res) => {
     ORDER BY d.fecha DESC
   `;
 
-  connection.query(sql, [usuario_id], (err, results) => {
-    if (err) {
-      console.error("Error al obtener las entradas diarias:", err);
-      return res.status(500).json({ error: "Error al obtener las entradas diarias" });
-    }
-    res.json(results);
-  });
-},
-
+      connection.query(sql, [usuario_id], (err, results) => {
+        if (err) {
+          console.error("Error al obtener las entradas diarias:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al obtener las entradas diarias" });
+        }
+        res.json(results);
+      });
+    },
 
     // Actualizar una entrada de Dailys
-updateDaily: (req, res) => {
-  const { id } = req.params;
-  const { fecha, usuario_id, ayer, avances, bloqueos, sprint_id } = req.body;
+    updateDaily: (req, res) => {
+      const { id } = req.params;
+      const { fecha, usuario_id, ayer, avances, bloqueos, sprint_id } =
+        req.body;
 
-  if (!fecha || !usuario_id || !ayer || !avances || !bloqueos || !sprint_id) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
+      if (
+        !fecha ||
+        !usuario_id ||
+        !ayer ||
+        !avances ||
+        !bloqueos ||
+        !sprint_id
+      ) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
 
-  const sql = `
+      const sql = `
     UPDATE dailys
     SET fecha = ?, usuario_id = ?, ayer = ?, avances = ?, bloqueos = ?, sprint_id = ?
     WHERE id = ?
   `;
 
-  const values = [fecha, usuario_id, ayer, avances, bloqueos, sprint_id, id];
+      const values = [
+        fecha,
+        usuario_id,
+        ayer,
+        avances,
+        bloqueos,
+        sprint_id,
+        id,
+      ];
 
-  connection.query(sql, values, (err) => {
-    if (err) {
-      console.error("Error al actualizar la entrada diaria:", err);
-      return res.status(500).json({ error: "Error al actualizar la entrada diaria" });
-    }
-    res.json({ message: "Entrada diaria actualizada correctamente" });
-  });
-},
+      connection.query(sql, values, (err) => {
+        if (err) {
+          console.error("Error al actualizar la entrada diaria:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al actualizar la entrada diaria" });
+        }
+        res.json({ message: "Entrada diaria actualizada correctamente" });
+      });
+    },
 
     // Eliminar una entrada de Dailys
     deleteDaily: (req, res) => {
@@ -235,48 +284,100 @@ updateDaily: (req, res) => {
       connection.query(sql, [id], (err) => {
         if (err) {
           console.error("Error al eliminar la entrada diaria:", err);
-          return res.status(500).json({ error: "Error al eliminar la entrada diaria" });
+          return res
+            .status(500)
+            .json({ error: "Error al eliminar la entrada diaria" });
         }
         res.json({ message: "Entrada diaria eliminada correctamente" });
       });
     },
 
+    getDailysPorUsuarioYGrado: (req, res) => {
+      const { usuario_id, grado_id } = req.params;
+
+      const sql = `
+      SELECT d.id, d.fecha, d.ayer, d.avances, d.bloqueos,
+            g.nombre AS grado,
+            s.nombre AS sprint
+      FROM dailys d
+      INNER JOIN sprints s ON d.sprint_id = s.id
+      INNER JOIN grados g ON s.curso_id = g.id
+      WHERE d.usuario_id = ? AND g.id = ?
+      ORDER BY d.fecha DESC
+
+  `;
+
+      connection.query(sql, [usuario_id, grado_id], (err, results) => {
+        if (err) {
+          console.error("Error al obtener entradas diarias:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al obtener entradas diarias" });
+        }
+        res.json(results);
+      });
+    },
 
     //RETROSPECTIVAS
+    // Crear retrospectiva (ahora extrae curso_id directamente del sprint)
+    createRetrospectiva: (req, res) => {
+      const {
+        sprint_id,
+        usuario_id,
+        puntos_buenos,
+        puntos_mejorar,
+        acciones_mejora,
+        fecha,
+      } = req.body;
 
-// Crear retrospectiva (ahora extrae curso_id directamente del sprint)
-createRetrospectiva: (req, res) => {
-  const { sprint_id, usuario_id, puntos_buenos, puntos_mejorar, acciones_mejora, fecha } = req.body;
+      if (
+        !sprint_id ||
+        !usuario_id ||
+        !puntos_buenos ||
+        !puntos_mejorar ||
+        !acciones_mejora ||
+        !fecha
+      ) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
 
-  if (!sprint_id || !usuario_id || !puntos_buenos || !puntos_mejorar || !acciones_mejora || !fecha) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
-
-  // No pedimos curso_id, lo obtenemos desde el sprint
-  const sql = `
+      // No pedimos curso_id, lo obtenemos desde el sprint
+      const sql = `
     INSERT INTO retrospectivas (sprint_id, usuario_id, puntos_buenos, puntos_mejorar, acciones_mejora, fecha)
     VALUES (?, ?, ?, ?, ?, ?)
   `;
 
-  connection.query(
-    sql,
-    [sprint_id, usuario_id, puntos_buenos, puntos_mejorar, acciones_mejora, fecha],
-    (err, result) => {
-      if (err) {
-        console.error("Error al registrar la retrospectiva:", err);
-        return res.status(500).json({ error: "Error al registrar la retrospectiva" });
-      }
+      connection.query(
+        sql,
+        [
+          sprint_id,
+          usuario_id,
+          puntos_buenos,
+          puntos_mejorar,
+          acciones_mejora,
+          fecha,
+        ],
+        (err, result) => {
+          if (err) {
+            console.error("Error al registrar la retrospectiva:", err);
+            return res
+              .status(500)
+              .json({ error: "Error al registrar la retrospectiva" });
+          }
 
-      res.status(201).json({ message: "Retrospectiva registrada correctamente", id: result.insertId });
-    }
-  );
-},
+          res.status(201).json({
+            message: "Retrospectiva registrada correctamente",
+            id: result.insertId,
+          });
+        }
+      );
+    },
 
-// Obtener retrospectivas por usuario
-getRetrospectivasByUsuario: (req, res) => {
-  const { usuario_id } = req.params;
+    // Obtener retrospectivas por usuario
+    getRetrospectivasByUsuario: (req, res) => {
+      const { usuario_id } = req.params;
 
-  const sql = `
+      const sql = `
     SELECT r.*, s.nombre AS sprint, g.nombre AS grado
     FROM retrospectivas r
     LEFT JOIN sprints s ON r.sprint_id = s.id
@@ -285,92 +386,133 @@ getRetrospectivasByUsuario: (req, res) => {
     ORDER BY r.fecha DESC
   `;
 
-  connection.query(sql, [usuario_id], (err, results) => {
-    if (err) {
-      console.error("Error al obtener retrospectivas:", err);
-      return res.status(500).json({ error: "Error al obtener retrospectivas" });
-    }
-    res.json(results);
-  });
-},
+      connection.query(sql, [usuario_id], (err, results) => {
+        if (err) {
+          console.error("Error al obtener retrospectivas:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al obtener retrospectivas" });
+        }
+        res.json(results);
+      });
+    },
 
-updateRetrospectiva: (req, res) => {
-  const { id } = req.params;
-  const { puntos_buenos, puntos_mejorar, acciones_mejora, fecha } = req.body;
+    updateRetrospectiva: (req, res) => {
+      const { id } = req.params;
+      const { puntos_buenos, puntos_mejorar, acciones_mejora, fecha } =
+        req.body;
 
-  console.log("Actualizar retrospectiva ID:", id);
-  console.log("Datos recibidos:", req.body);
+      if (!puntos_buenos || !puntos_mejorar || !acciones_mejora || !fecha) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
 
-  if (!puntos_buenos || !puntos_mejorar || !acciones_mejora || !fecha) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
-
-  const sql = `
+      const sql = `
     UPDATE retrospectivas
     SET puntos_buenos = ?, puntos_mejorar = ?, acciones_mejora = ?, fecha = ?
     WHERE id = ?
   `;
 
-  connection.query(sql, [puntos_buenos, puntos_mejorar, acciones_mejora, fecha, id], (err) => {
-    if (err) {
-      console.error("Error al actualizar la retrospectiva:", err);
-      return res.status(500).json({ error: "Error al actualizar la retrospectiva" });
-    }
+      connection.query(
+        sql,
+        [puntos_buenos, puntos_mejorar, acciones_mejora, fecha, id],
+        (err) => {
+          if (err) {
+            console.error("Error al actualizar la retrospectiva:", err);
+            return res
+              .status(500)
+              .json({ error: "Error al actualizar la retrospectiva" });
+          }
 
-    res.json({ message: "Retrospectiva actualizada correctamente" });
-  });
-},
+          res.json({ message: "Retrospectiva actualizada correctamente" });
+        }
+      );
+    },
 
-deleteRetrospectiva: (req, res) => {
-  const { id } = req.params;
+    deleteRetrospectiva: (req, res) => {
+      const { id } = req.params;
 
-  const sql = "DELETE FROM retrospectivas WHERE id = ?";
+      const sql = "DELETE FROM retrospectivas WHERE id = ?";
 
-  connection.query(sql, [id], (err) => {
-    if (err) {
-      console.error("Error al eliminar la retrospectiva:", err);
-      return res.status(500).json({ error: "Error al eliminar la retrospectiva" });
-    }
+      connection.query(sql, [id], (err) => {
+        if (err) {
+          console.error("Error al eliminar la retrospectiva:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al eliminar la retrospectiva" });
+        }
 
-    res.json({ message: "Retrospectiva eliminada correctamente" });
-  });
-},
+        res.json({ message: "Retrospectiva eliminada correctamente" });
+      });
+    },
 
-// TAREAS
- // Crear tarea Kanban
-createTarea: (req, res) => {
-  const { titulo, descripcion, prioridad, estado, backlog_id, sprint_id, asignado_a } = req.body;
+    getRetrosByUsuarioAndGrado: (req, res) => {
+      const { usuario_id, grado_id } = req.params;
 
-  if (!titulo || !prioridad || !backlog_id) {
-    return res.status(400).json({ error: "Faltan campos obligatorios" });
-  }
+      const sql = `
+    SELECT r.*, g.nombre AS grado
+    FROM retrospectivas r
+    LEFT JOIN sprints s ON r.sprint_id = s.id
+    LEFT JOIN grados g ON s.curso_id = g.id
+    WHERE r.usuario_id = ? AND g.id = ?
+    ORDER BY r.fecha DESC
+  `;
 
-  const sql = `
+      connection.query(sql, [usuario_id, grado_id], (err, results) => {
+        if (err) {
+          console.error("Error al obtener retrospectivas por grado:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al obtener retrospectivas" });
+        }
+        res.json(results);
+      });
+    },
+
+    // TAREAS
+    // Crear tarea Kanban
+    createTarea: (req, res) => {
+      const {
+        titulo,
+        descripcion,
+        prioridad,
+        estado,
+        backlog_id,
+        sprint_id,
+        asignado_a,
+      } = req.body;
+
+      if (!titulo || !prioridad || !backlog_id) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
+
+      const sql = `
     INSERT INTO tareas (titulo, descripcion, prioridad, estado, backlog_id, sprint_id, asignado_a)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
-  connection.query(
-    sql,
-    [
-      titulo,
-      descripcion || "",
-      prioridad,
-      estado || "Por hacer",
-      backlog_id,
-      sprint_id || null,
-      asignado_a || null,
-    ],
-    (err, result) => {
-      if (err) {
-        console.error("Error al insertar tarea:", err);
-        return res.status(500).json({ error: "Error al crear la tarea" });
-      }
-      res.status(201).json({ id: result.insertId, message: "Tarea creada correctamente" });
-    }
-  );
-},
-
+      connection.query(
+        sql,
+        [
+          titulo,
+          descripcion || "",
+          prioridad,
+          estado || "Por hacer",
+          backlog_id,
+          sprint_id || null,
+          asignado_a || null,
+        ],
+        (err, result) => {
+          if (err) {
+            console.error("Error al insertar tarea:", err);
+            return res.status(500).json({ error: "Error al crear la tarea" });
+          }
+          res.status(201).json({
+            id: result.insertId,
+            message: "Tarea creada correctamente",
+          });
+        }
+      );
+    },
 
     // Obtener tareas por curso (vía backlog → curso)
     getTareasByCurso: (req, res) => {
@@ -388,7 +530,10 @@ createTarea: (req, res) => {
       `;
 
       connection.query(sql, [curso_id], (err, results) => {
-        if (err) return res.status(500).json({ error: "Error al obtener tareas por curso" });
+        if (err)
+          return res
+            .status(500)
+            .json({ error: "Error al obtener tareas por curso" });
         res.json(results);
       });
     },
@@ -404,10 +549,17 @@ createTarea: (req, res) => {
         WHERE id = ?
       `;
 
-      connection.query(sql, [titulo, descripcion, prioridad, estado, id], (err) => {
-        if (err) return res.status(500).json({ error: "Error al actualizar la tarea" });
-        res.json({ message: "Tarea actualizada correctamente" });
-      });
+      connection.query(
+        sql,
+        [titulo, descripcion, prioridad, estado, id],
+        (err) => {
+          if (err)
+            return res
+              .status(500)
+              .json({ error: "Error al actualizar la tarea" });
+          res.json({ message: "Tarea actualizada correctamente" });
+        }
+      );
     },
 
     // Eliminar tarea Kanban
@@ -417,50 +569,213 @@ createTarea: (req, res) => {
       const sql = `DELETE FROM tareas WHERE id = ?`;
 
       connection.query(sql, [id], (err) => {
-        if (err) return res.status(500).json({ error: "Error al eliminar la tarea" });
+        if (err)
+          return res.status(500).json({ error: "Error al eliminar la tarea" });
         res.json({ message: "Tarea eliminada correctamente" });
       });
     },
 
+    // Actualizar estado de tarea Kanban
     updateEstadoTarea: (req, res) => {
-  const { id } = req.params;
-  const { estado } = req.body;
+      const { id } = req.params;
+      const { estado } = req.body;
 
-  if (!estado) {
-    return res.status(400).json({ error: "El estado es requerido" });
-  }
+      if (!estado) {
+        return res.status(400).json({ error: "El estado es requerido" });
+      }
 
-  const sql = `UPDATE tareas SET estado = ? WHERE id = ?`;
+      const sql = `UPDATE tareas SET estado = ? WHERE id = ?`;
 
-  connection.query(sql, [estado, id], (err) => {
-    if (err) {
-      console.error("Error al actualizar estado de la tarea:", err);
-      return res.status(500).json({ error: "Error al actualizar estado" });
-    }
-    res.json({ message: "Estado actualizado correctamente" });
-  });
-},
-culminarTarea: (req, res) => {
-  const { id } = req.params;
+      connection.query(sql, [estado, id], (err) => {
+        if (err) {
+          console.error("Error al actualizar estado de la tarea:", err);
+          return res.status(500).json({ error: "Error al actualizar estado" });
+        }
+        res.json({ message: "Estado actualizado correctamente" });
+      });
+    },
+    culminarTarea: (req, res) => {
+      const { id } = req.params;
 
-  const sql = `
+      const sql = `
     UPDATE tareas
     SET estado = 'Culminado'
     WHERE id = ?
   `;
 
-  connection.query(sql, [id], (err) => {
-    if (err) {
-      console.error("Error al actualizar estado:", err);
-      return res.status(500).json({ error: "Error al marcar como culminada" });
-    }
-    res.json({ message: "Tarea marcada como culminada" });
-  });
-}
+      connection.query(sql, [id], (err) => {
+        if (err) {
+          console.error("Error al actualizar estado:", err);
+          return res
+            .status(500)
+            .json({ error: "Error al marcar como culminada" });
+        }
+        res.json({ message: "Tarea marcada como culminada" });
+      });
+    },
+
+    // REPORTES
+    // 1. Progreso de tareas por grado
+    getTareasPorGrado: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+      SELECT estado, COUNT(*) AS total
+      FROM tareas t
+      JOIN backlog b ON t.backlog_id = b.id
+      WHERE b.curso_id = ?
+      GROUP BY estado;
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 2. Evaluaciones promedio por grado
+    getEvaluacionesPorGrado: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+      SELECT g.nombre AS grado, ROUND(AVG(e.nota), 2) AS promedio_nota
+      FROM grados g
+      JOIN backlog b ON b.curso_id = g.id
+      JOIN evaluaciones e ON e.tarea_id = b.id
+      WHERE g.id = ?
+      GROUP BY g.nombre;
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 3. Participación en dailys por usuario
+    getDailysPorGrado: (req, res) => {
+      const grado_id = req.params.grado_id;
+
+      const sql = `
+SELECT g.nombre AS grado, COUNT(d.id) AS total_dailys
+FROM dailys d
+JOIN usuarios u ON d.usuario_id = u.id
+JOIN usuario_grado ug ON ug.usuario_id = u.id
+JOIN grados g ON ug.grado_id = g.id
+WHERE g.id = ?
+GROUP BY g.nombre;
+
+  `;
+
+      connection.query(sql, [grado_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 4. Promedio por sprint
+    getPromedioPorSprintPorGrado: (req, res) => {
+      const grado_id = req.params.grado_id;
+
+      const sql = `
+SELECT g.nombre AS grado, ROUND(AVG(e.nota), 2) AS promedio
+FROM evaluaciones e
+JOIN backlog b ON e.tarea_id = b.id
+JOIN grados g ON b.curso_id = g.id
+WHERE b.curso_id = ?
+GROUP BY g.nombre;
+
+  `;
+
+      connection.query(sql, [grado_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 6. Retrospectivas por sprint
+    getRetrospectivasPorSprint: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+      SELECT s.nombre AS sprint, COUNT(r.id) AS total_retrospectivas
+      FROM retrospectivas r
+      JOIN sprints s ON r.sprint_id = s.id
+      WHERE s.curso_id = ?
+      GROUP BY s.nombre;
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 7. Feedback recibido por grado
+    getFeedbackPorGrado: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+SELECT 
+  g.nombre AS grado,
+  COUNT(e.id) AS total_evaluaciones,
+  COUNT(e.retroalimentacion) AS con_retroalimentacion
+FROM evaluaciones e
+JOIN backlog b ON e.tarea_id = b.id
+JOIN grados g ON b.curso_id = g.id
+WHERE g.id = ?
+GROUP BY g.nombre;
+
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results[0] || {});
+      });
+    },
+
+    // 8. Sprints finalizados
+    getSprintsFinalizadosPorGrado: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+      SELECT id, nombre, fecha_fin
+      FROM sprints
+      WHERE curso_id = ? AND fecha_fin < CURDATE()
+      ORDER BY fecha_fin DESC;
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 9. Tareas antiguas pendientes
+    getTareasAntiguasPendientes: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+      SELECT t.id, t.titulo, b.fecha_creacion
+      FROM tareas t
+      JOIN backlog b ON t.backlog_id = b.id
+      WHERE b.curso_id = ? AND t.estado NOT IN ('Hecho', 'Culminado')
+      ORDER BY b.fecha_creacion ASC
+      LIMIT 5;
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results);
+      });
+    },
+
+    // 10. Racha de participación en dailys
+    getDiasConsecutivosDailys: (req, res) => {
+      const curso_id = req.params.curso_id;
+      const sql = `
+SELECT u.id, u.nombre_completo, COUNT(*) AS total_dailys
+FROM usuarios u
+JOIN dailys d ON u.id = d.usuario_id
+WHERE u.curso_id = ?
+GROUP BY u.id
+ORDER BY total_dailys DESC
+LIMIT 1;
 
 
-
-
-
+    `;
+      connection.query(sql, [curso_id], (err, results) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(results[0] || { dias_consecutivos: 0 });
+      });
+    },
   };
 };

@@ -9,6 +9,7 @@ import CrearCuenta from './admin/CrearCuenta';
 import EditarUsuarios from './admin/EditarUsuarios';
 import AdminProyectos from './admin/Proyectos';
 import ConoceElMarcoAdmin from './admin/MarcoAdmin';
+import AsignarGrados from './admin/AsignarGrados';
 
 import ReportesCoord from './coordinador/ReportesCoord';
 import Backlog from './coordinador/Backlog';
@@ -36,6 +37,7 @@ function App() {
           <Route path="/admin/editar-usuarios" element={<EditarUsuarios />} />
           <Route path="/admin/proyectos" element={<AdminProyectos />} />
           <Route path="/admin/marco" element={<ConoceElMarcoAdmin />} />
+          <Route path="/admin/asignar-grados" element={<AsignarGrados />} />
         </Route>
 
         {/* Coordinador */}
