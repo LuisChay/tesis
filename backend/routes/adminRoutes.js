@@ -27,12 +27,10 @@ module.exports = (connection) => {
   router.get("/reporte-cumplimiento-sprint", adminController.getCumplimientoPorSprint);
   router.get("/reporte-feedback", adminController.getEvaluacionesConFeedback);
 
-
   // Asignaciones
   router.get("/get-grados-usuario/:usuario_id", adminController.getGradosPorUsuario);
   router.post("/asignar-grado", adminController.asignarGrado);
   router.delete("/eliminar-asignacion/:usuario_id/:grado_id", adminController.eliminarAsignacion);
-
 
   return router;
 };

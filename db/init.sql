@@ -40,7 +40,6 @@ CREATE TABLE usuario_grado (
     FOREIGN KEY (grado_id) REFERENCES grados(id)
 );
 
-
 -- Tabla de proyectos
 CREATE TABLE proyectos (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -54,15 +53,6 @@ CREATE TABLE proyectos (
     FOREIGN KEY (responsable_id) REFERENCES usuarios(id),
     FOREIGN KEY (curso_id) REFERENCES grados(id)
 );
-
--- Tabla de equipos
-CREATE TABLE equipos (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    curso_id INT,
-    nombre_equipo VARCHAR(100),
-    FOREIGN KEY (curso_id) REFERENCES grados(id)
-);
-
 
 
 -- Tabla de backlog educativo
@@ -105,20 +95,6 @@ CREATE TABLE tareas (
     FOREIGN KEY (asignado_a) REFERENCES usuarios(id)
 );
 
--- Tabla de reportes
-CREATE TABLE reportes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    sprint_id INT,
-    equipo_id INT,
-    entregables TEXT,
-    indicadores TEXT,
-    generado_por INT,
-    fecha_generacion DATE,
-    FOREIGN KEY (sprint_id) REFERENCES sprints(id),
-    FOREIGN KEY (equipo_id) REFERENCES equipos(id),
-    FOREIGN KEY (generado_por) REFERENCES usuarios(id)
-);
-
 -- Tabla de reuniones diarias (Dailys)
 CREATE TABLE dailys (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -145,7 +121,6 @@ CREATE TABLE evaluaciones (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (evaluado_por) REFERENCES usuarios(id)
 );
-
 
 --  Tabla de retrospectivas
 CREATE TABLE retrospectivas (

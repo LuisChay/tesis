@@ -19,10 +19,10 @@ const DailyEntry = () => {
 
   const [sprints, setSprints] = useState([]);
   const [sprint_id, setSprintId] = useState("");
-  const [gradoActual, setGradoActual] = useState(""); // mostrar nombre del grado del sprint seleccionado
+  const [gradoActual, setGradoActual] = useState(""); 
 
-  const [gradoFiltro, setGradoFiltro] = useState(""); // Para filtrar las entradas
-  const [gradoFormulario, setGradoFormulario] = useState(""); // Para cargar sprints al agregar
+  const [gradoFiltro, setGradoFiltro] = useState("");
+  const [gradoFormulario, setGradoFormulario] = useState(""); 
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;

@@ -5,20 +5,19 @@ module.exports = (connection) => {
   const equipoController = require('../controllers/equipoController')(connection);
 
   // Rutas para Sprints
-  router.post("/create-sprint", equipoController.createSprint);   // Ruta para crear un sprint
-  router.get("/get-sprints", equipoController.getSprints);        // Ruta para obtener los sprints
-  router.put("/close-sprint/:id", equipoController.closeSprint);  // Ruta para cerrar un sprint
-  router.put("/update-sprint/:id", equipoController.updateSprint);    // Actualizar sprint
-  router.delete("/delete-sprint/:id", equipoController.deleteSprint); // Eliminar sprint
+  router.post("/create-sprint", equipoController.createSprint);   
+  router.get("/get-sprints", equipoController.getSprints);        
+  router.put("/close-sprint/:id", equipoController.closeSprint);  
+  router.put("/update-sprint/:id", equipoController.updateSprint);    
+  router.delete("/delete-sprint/:id", equipoController.deleteSprint); 
   router.get("/get-sprints-grado/:grado_id", equipoController.getSprintsByGrado);
 
   // Rutas para Dailys
-  router.post("/create-daily", equipoController.createDaily); // Crear nueva entrada
-  router.get("/get-dailys/:usuario_id", equipoController.getDailysByUsuario); // Obtener las entradas por usuario y sprint
-  router.put("/update-daily/:id", equipoController.updateDaily); // Actualizar entrada
-  router.delete("/delete-daily/:id", equipoController.deleteDaily); // Eliminar entrada
+  router.post("/create-daily", equipoController.createDaily); 
+  router.get("/get-dailys/:usuario_id", equipoController.getDailysByUsuario);
+  router.put("/update-daily/:id", equipoController.updateDaily);
+  router.delete("/delete-daily/:id", equipoController.deleteDaily); 
   router.get("/get-dailys-usuario-grado/:usuario_id/:grado_id", equipoController.getDailysPorUsuarioYGrado);
-
 
   // Rutas para Retrospectivas
   router.post("/create-retrospectiva", equipoController.createRetrospectiva);
@@ -27,13 +26,12 @@ module.exports = (connection) => {
   router.delete("/delete-retrospectiva/:id", equipoController.deleteRetrospectiva);
   router.get("/get-retrospectivas-usuario-grado/:usuario_id/:grado_id", equipoController.getRetrosByUsuarioAndGrado);
 
-
   // Rutas para Tareas
   router.post("/create-tarea", equipoController.createTarea);
   router.get("/get-tareas/:curso_id", equipoController.getTareasByCurso);
   router.put("/update-tarea/:id", equipoController.updateTarea);
   router.delete("/delete-tarea/:id", equipoController.deleteTarea);
-  router.put("/update-estado/:id", equipoController.updateEstadoTarea); // Actualizar estado de tarea
+  router.put("/update-estado/:id", equipoController.updateEstadoTarea);
   router.put("/culminar-tarea/:id", equipoController.culminarTarea);
 
   // Rutas para reportes
@@ -46,7 +44,6 @@ module.exports = (connection) => {
   router.get("/reportes/sprints-finalizados/:curso_id", equipoController.getSprintsFinalizadosPorGrado);
   router.get("/reportes/tareas-antiguas/:curso_id", equipoController.getTareasAntiguasPendientes);
   router.get("/reportes/racha-dailys/:curso_id", equipoController.getDiasConsecutivosDailys);
-
 
   return router;
 };

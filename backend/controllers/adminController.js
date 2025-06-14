@@ -1,5 +1,7 @@
 module.exports = (connection) => {
   return {
+
+    // PROYECTOS
     // Obtener todos los proyectos con info de grado y responsable
     getProyectos: (req, res) => {
       const sql = `
@@ -57,16 +59,15 @@ module.exports = (connection) => {
         (err, result) => {
           if (err)
             return res.status(500).json({ error: "Error al crear proyecto" });
-          res
-            .status(201)
-            .json({
-              message: "Proyecto creado correctamente",
-              id: result.insertId,
-            });
+          res.status(201).json({
+            message: "Proyecto creado correctamente",
+            id: result.insertId,
+          });
         }
       );
     },
 
+    // Actualizar proyecto
     updateProyecto: (req, res) => {
       const { id } = req.params;
       const {
@@ -108,6 +109,7 @@ module.exports = (connection) => {
       );
     },
 
+    // Eliminar proyecto
     deleteProyecto: (req, res) => {
       const { id } = req.params;
       const sql = "DELETE FROM proyectos WHERE id = ?";
@@ -118,7 +120,7 @@ module.exports = (connection) => {
       });
     },
 
-    // Grados
+    // GRADOS
     // Obtener todos los grados
     getGrados: (req, res) => {
       const sql = "SELECT * FROM grados ORDER BY nombre ASC";
@@ -153,6 +155,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Actualizar un grado
     updateGrado: (req, res) => {
       const { id } = req.params;
       const { nombre } = req.body;
@@ -169,6 +172,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Eliminar un grado
     deleteGrado: (req, res) => {
       const { id } = req.params;
       const sql = "DELETE FROM grados WHERE id = ?";
@@ -179,6 +183,7 @@ module.exports = (connection) => {
       });
     },
 
+    // REPORTES
     // Reporte: Cantidad de proyectos por grado
     getResumenProyectosPorGrado: (req, res) => {
       const sql = `
@@ -239,7 +244,8 @@ module.exports = (connection) => {
         res.json(results);
       });
     },
-
+    
+    // Reporte: Cantidad de retrospectivas por sprint
     getRetrospectivasPorSprint: (req, res) => {
       const sql = `
     SELECT 
@@ -261,6 +267,8 @@ module.exports = (connection) => {
         res.json(results);
       });
     },
+
+    // Reporte: Progreso del backlog por grado
     getProgresoBacklogPorGrado: (req, res) => {
       const sql = `
     SELECT 
@@ -282,6 +290,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Reporte: Estado de proyectos por grado
     getEstadoProyectosPorGrado: (req, res) => {
       const sql = `
     SELECT 
@@ -302,6 +311,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Reporte: Ranking de desempeño por grado
     getRankingDesempenoPorGrado: (req, res) => {
       const sql = `
     SELECT 
@@ -322,6 +332,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Reporte: Cumplimiento de tareas por sprint
     getCumplimientoPorSprint: (req, res) => {
       const sql = `
     SELECT 
@@ -345,6 +356,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Reporte: Evaluaciones con feedback por grado
     getEvaluacionesConFeedback: (req, res) => {
       const sql = `
     SELECT 
@@ -367,8 +379,7 @@ module.exports = (connection) => {
     },
 
     // ASIGNACIONES
-
-     // Obtener grados asignados a un usuario
+    // Obtener grados asignados a un usuario
     getGradosPorUsuario: (req, res) => {
       const { usuario_id } = req.params;
 
@@ -379,7 +390,8 @@ module.exports = (connection) => {
         WHERE ug.usuario_id = ?
       `;
       connection.query(sql, [usuario_id], (err, results) => {
-        if (err) return res.status(500).json({ error: "Error al obtener grados" });
+        if (err)
+          return res.status(500).json({ error: "Error al obtener grados" });
         res.json(results);
       });
     },
@@ -388,18 +400,25 @@ module.exports = (connection) => {
     asignarGrado: (req, res) => {
       const { usuario_id, grado_id } = req.body;
 
-      
-      if (!usuario_id || !grado_id) return res.status(400).json({ error: "Datos incompletos" });
+      if (!usuario_id || !grado_id)
+        return res.status(400).json({ error: "Datos incompletos" });
 
       const checkSql = `SELECT id FROM usuario_grado WHERE usuario_id = ? AND grado_id = ?`;
       connection.query(checkSql, [usuario_id, grado_id], (err, rows) => {
-        if (err) return res.status(500).json({ error: "Error al verificar duplicado" });
-        if (rows.length > 0) return res.status(409).json({ error: "Ya está asignado" });
+        if (err)
+          return res
+            .status(500)
+            .json({ error: "Error al verificar duplicado" });
+        if (rows.length > 0)
+          return res.status(409).json({ error: "Ya está asignado" });
 
         const insertSql = `INSERT INTO usuario_grado (usuario_id, grado_id) VALUES (?, ?)`;
         connection.query(insertSql, [usuario_id, grado_id], (err, result) => {
-          if (err) return res.status(500).json({ error: "Error al asignar grado" });
-          res.status(201).json({ message: "Asignación exitosa", id: result.insertId });
+          if (err)
+            return res.status(500).json({ error: "Error al asignar grado" });
+          res
+            .status(201)
+            .json({ message: "Asignación exitosa", id: result.insertId });
         });
       });
     },
@@ -409,7 +428,10 @@ module.exports = (connection) => {
       const { usuario_id, grado_id } = req.params;
       const sql = `DELETE FROM usuario_grado WHERE usuario_id = ? AND grado_id = ?`;
       connection.query(sql, [usuario_id, grado_id], (err) => {
-        if (err) return res.status(500).json({ error: "Error al eliminar asignación" });
+        if (err)
+          return res
+            .status(500)
+            .json({ error: "Error al eliminar asignación" });
         res.json({ message: "Asignación eliminada" });
       });
     },

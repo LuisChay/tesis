@@ -41,7 +41,6 @@ const ReportesCoord = () => {
   const [tareasAntiguas, setTareasAntiguas] = useState([]);
   const [participacionGrados, setParticipacionGrados] = useState([]);
 
-
   useEffect(() => {
     const base = `http://localhost:5100/coord`;
     fetch(`${base}/reporte-tareas-estado/${coordinador_id}`)
@@ -90,14 +89,16 @@ const ReportesCoord = () => {
     })),
   };
 
-const participacionData = {
-  labels: participacionGrados.map(g => g.grado),
-  datasets: [{
-    label: "Total de Dailys",
-    data: participacionGrados.map(g => g.total_dailys),
-    backgroundColor: "#60a5fa"
-  }]
-};
+  const participacionData = {
+    labels: participacionGrados.map((g) => g.grado),
+    datasets: [
+      {
+        label: "Total de Dailys",
+        data: participacionGrados.map((g) => g.total_dailys),
+        backgroundColor: "#60a5fa",
+      },
+    ],
+  };
 
   const promediosData = {
     labels: promedios.map((p) => p.grado),
@@ -198,10 +199,12 @@ const participacionData = {
             />
           </Card>
 
-<Card title="Participación por Grado">
-  <Bar data={participacionData} options={{ responsive: true, maintainAspectRatio: false }} />
-</Card>
-
+          <Card title="Participación por Grado">
+            <Bar
+              data={participacionData}
+              options={{ responsive: true, maintainAspectRatio: false }}
+            />
+          </Card>
 
           <Card title="Promedios de Evaluación">
             <Bar

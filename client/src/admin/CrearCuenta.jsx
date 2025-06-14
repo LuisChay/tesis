@@ -10,71 +10,72 @@ const CrearCuenta = () => {
 
   const rolMap = {
     coordinador: 2,
-    equipo: 3
-    };
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  const data = {
-    nombre_completo: nombreCompleto,
-    correo,
-    contrasena,
-    rol_id: rolMap[rol] || 2,
+    equipo: 3,
   };
 
-  try {
-    const response = await fetch("http://localhost:5100/users/create-usuario", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const resData = await response.json();
+    const data = {
+      nombre_completo: nombreCompleto,
+      correo,
+      contrasena,
+      rol_id: rolMap[rol] || 2,
+    };
 
-    if (!response.ok) {
-      let mensajeError = "Error al crear usuario";
-      switch (response.status) {
-        case 400:
-          mensajeError = "Por favor complete todos los campos.";
-          break;
-        case 409:
-          mensajeError = "El correo ya está registrado.";
-          break;
-        case 500:
-          mensajeError = "Error interno del servidor, intenta más tarde.";
-          break;
+    try {
+      const response = await fetch(
+        "http://localhost:5100/users/create-usuario",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        let mensajeError = "Error al crear usuario";
+        switch (response.status) {
+          case 400:
+            mensajeError = "Por favor complete todos los campos.";
+            break;
+          case 409:
+            mensajeError = "El correo ya está registrado.";
+            break;
+          case 500:
+            mensajeError = "Error interno del servidor, intenta más tarde.";
+            break;
+        }
+
+        return Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: mensajeError,
+        });
       }
 
-      return Swal.fire({
+      Swal.fire({
+        icon: "success",
+        title: "¡Éxito!",
+        text: "Usuario creado correctamente.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
+      setNombreCompleto("");
+      setCorreo("");
+      setContrasena("");
+      setRol("coordinador");
+    } catch (error) {
+      Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: mensajeError,
+        title: "Error de conexión",
+        text: "No se pudo conectar con el servidor.",
       });
     }
-
-    Swal.fire({
-      icon: "success",
-      title: "¡Éxito!",
-      text: "Usuario creado correctamente.",
-      timer: 1800,
-      showConfirmButton: false,
-    });
-
-    setNombreCompleto("");
-    setCorreo("");
-    setContrasena("");
-    setRol("coordinador");
-
-  } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Error de conexión",
-      text: "No se pudo conectar con el servidor.",
-    });
-  }
-};
-
+  };
 
   return (
     <AdminLayout>

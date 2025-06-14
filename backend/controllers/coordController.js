@@ -35,6 +35,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Obtener backlog por usuario (coordinador)
     getBacklogByUser: (req, res) => {
       const { userId } = req.params;
 
@@ -65,6 +66,38 @@ module.exports = (connection) => {
       });
     },
 
+    // Obtener backlog por grado
+    getBacklogByGrado: (req, res) => {
+      const { grado_id } = req.params;
+
+      const sql = `
+    SELECT 
+      b.id, 
+      b.titulo, 
+      b.descripcion, 
+      b.curso_id,
+      b.proyecto_id,
+      DATE_FORMAT(b.fecha_creacion, '%Y-%m-%d') AS fecha_creacion,
+      g.nombre AS grado,
+      p.nombre AS proyecto
+    FROM backlog b
+    LEFT JOIN grados g ON b.curso_id = g.id
+    LEFT JOIN proyectos p ON b.proyecto_id = p.id
+    WHERE b.curso_id = ?
+    ORDER BY b.id DESC
+  `;
+
+      connection.query(sql, [grado_id], (err, results) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Error al obtener backlog por grado" });
+        }
+        res.json(results);
+      });
+    },
+
+    // Obtener todas las tareas del backlog
     getAllBacklog: (req, res) => {
       const sql = `
     SELECT 
@@ -159,6 +192,7 @@ module.exports = (connection) => {
     },
 
     // EVALUACIONES
+    // Crear evaluación
     createEvaluacion: (req, res) => {
       const { tarea_id, usuario_id, nota, retroalimentacion, evaluado_por } =
         req.body;
@@ -197,12 +231,10 @@ module.exports = (connection) => {
                 .status(500)
                 .json({ error: "Error interno al guardar evaluación" });
             }
-            res
-              .status(201)
-              .json({
-                id: result.insertId,
-                message: "Evaluación guardada correctamente",
-              });
+            res.status(201).json({
+              id: result.insertId,
+              message: "Evaluación guardada correctamente",
+            });
           }
         );
       });
@@ -239,6 +271,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Obtener evaluaciones por tarea
     deleteEvaluacion: (req, res) => {
       const { id } = req.params;
       const sql = "DELETE FROM evaluaciones WHERE id = ?";
@@ -253,6 +286,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Actualizar evaluación
     updateEvaluacion: (req, res) => {
       const { id } = req.params;
       const { tarea_id, nota, retroalimentacion } = req.body;
@@ -278,6 +312,7 @@ module.exports = (connection) => {
     },
 
     // REPORTES
+    // Reporte: Tareas por grado y estado
     getTareasPorGradoYEstado: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -301,6 +336,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Reporte: Participación en dailys por coordinador
     getParticipacionDailys: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -322,8 +358,10 @@ module.exports = (connection) => {
         res.json(results);
       });
     },
-getParticipacionDailysPorGrado: (req, res) => {
-  const sql = `
+    
+    // Reporte: Participación en dailys por grado
+    getParticipacionDailysPorGrado: (req, res) => {
+      const sql = `
     SELECT g.nombre AS grado, COUNT(d.id) AS total_dailys
     FROM dailys d
     JOIN usuarios u ON d.usuario_id = u.id
@@ -332,14 +370,17 @@ getParticipacionDailysPorGrado: (req, res) => {
     GROUP BY g.nombre;
   `;
 
-  connection.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Error al obtener participación por grado" });
-    }
-    res.json(results);
-  });
-},
-    
+      connection.query(sql, (err, results) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Error al obtener participación por grado" });
+        }
+        res.json(results);
+      });
+    },
+
+    // Reporte: Estado de proyectos por grado
     getPromedioEvaluacionPorGrado: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -362,7 +403,8 @@ getParticipacionDailysPorGrado: (req, res) => {
         res.json(results);
       });
     },
-
+    
+    // Reporte: Ranking de desempeño por grado
     getRetrospectivasPorSprint: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -384,6 +426,7 @@ getParticipacionDailysPorGrado: (req, res) => {
       });
     },
 
+    // Reporte: Cumplimiento de tareas por sprint
     getActividadBacklog: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -404,6 +447,7 @@ getParticipacionDailysPorGrado: (req, res) => {
       });
     },
 
+    // Reporte: Evaluaciones con feedback por grado
     getRankingGrados: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -428,6 +472,7 @@ getParticipacionDailysPorGrado: (req, res) => {
       });
     },
 
+    // Reporte: Cumplimiento de tareas por coordinador
     getCumplimientoTareas: (req, res) => {
       const { coordinador_id } = req.params;
 
@@ -452,6 +497,7 @@ getParticipacionDailysPorGrado: (req, res) => {
       });
     },
 
+    // Reporte: Tareas antiguas pendientes
     getTareasAntiguasPendientes: (req, res) => {
       const { coordinador_id } = req.params;
 

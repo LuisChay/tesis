@@ -73,12 +73,17 @@ const EditarUsuarios = () => {
 
       const resData = await res.json();
 
-      if (!res.ok) throw new Error(resData.error || "Error actualizando usuario");
+      if (!res.ok)
+        throw new Error(resData.error || "Error actualizando usuario");
 
       setUsuarios((prev) =>
         prev.map((u) =>
           u.id === editUserId
-            ? { ...u, ...editData, rol: rolMap[editData.rol_id] || "coordinador" }
+            ? {
+                ...u,
+                ...editData,
+                rol: rolMap[editData.rol_id] || "coordinador",
+              }
             : u
         )
       );
@@ -113,12 +118,16 @@ const EditarUsuarios = () => {
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5100/users/delete-usuario/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://localhost:5100/users/delete-usuario/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
       const resData = await res.json();
 
-      if (!res.ok) throw new Error(resData.error || "No se pudo eliminar el usuario");
+      if (!res.ok)
+        throw new Error(resData.error || "No se pudo eliminar el usuario");
 
       setUsuarios((prev) => prev.filter((u) => u.id !== id));
 
@@ -139,7 +148,10 @@ const EditarUsuarios = () => {
 
   const startIndexUsuarios = (currentPageUsuarios - 1) * 5;
   const endIndexUsuarios = startIndexUsuarios + 5;
-  const usuariosPaginados = usuarios.slice(startIndexUsuarios, endIndexUsuarios);
+  const usuariosPaginados = usuarios.slice(
+    startIndexUsuarios,
+    endIndexUsuarios
+  );
   const totalPagesUsuarios = Math.ceil(usuarios.length / 5);
 
   const cambiarPaginaUsuarios = (page) => {
@@ -151,13 +163,12 @@ const EditarUsuarios = () => {
     <AdminLayout>
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
-          Editar Usuarios
+          Editar usuarios
         </h1>
         <div className="overflow-x-auto">
           <table className="w-full table-auto text-sm border-t pt-4">
             <thead>
-                            <tr className="text-left bg-gray-100">
-
+              <tr className="text-left bg-gray-100">
                 <th className="px-4 py-2 border-b">Nombre</th>
                 <th className="px-4 py-2 border-b">Correo</th>
                 <th className="px-4 py-2 border-b">Rol</th>
@@ -196,7 +207,9 @@ const EditarUsuarios = () => {
                   <td className="px-4 py-3 border-b capitalize text-gray-700">
                     {editUserId === user.id ? (
                       user.rol_id === 1 ? (
-                        <span className="font-semibold text-red-600">Administrador</span>
+                        <span className="font-semibold text-red-600">
+                          Administrador
+                        </span>
                       ) : (
                         <select
                           name="rol_id"

@@ -50,7 +50,6 @@ const ReportesEquipo = () => {
   const [grados, setGrados] = useState([]);
   const [gradoSeleccionado, setGradoSeleccionado] = useState("");
 
-  // Obtener los grados del usuario (profesor/equipo)
   useEffect(() => {
     fetch(`http://localhost:5100/admin/get-grados-usuario/${usuario_id}`)
       .then((res) => res.json())
@@ -167,22 +166,21 @@ const ReportesEquipo = () => {
 
   return (
     <EquipoLayout>
-
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-xl p-6 my-10">
-              <div className="mb-6 flex justify-start">
-        <select
-          value={gradoSeleccionado}
-          onChange={(e) => setGradoSeleccionado(e.target.value)}
-          className="border border-gray-300 px-4 py-2 rounded-md"
-        >
-          <option value="">Selecciona un grado</option>
-          {grados.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.nombre}
-            </option>
-          ))}
-        </select>
-      </div>
+        <div className="mb-6 flex justify-start">
+          <select
+            value={gradoSeleccionado}
+            onChange={(e) => setGradoSeleccionado(e.target.value)}
+            className="border border-gray-300 px-4 py-2 rounded-md"
+          >
+            <option value="">Selecciona un grado</option>
+            {grados.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
           Reportes del Equipo
@@ -248,8 +246,6 @@ const ReportesEquipo = () => {
             </ul>
           </Card>
         </div>
-
-
       </div>
     </EquipoLayout>
   );

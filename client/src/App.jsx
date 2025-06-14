@@ -22,6 +22,7 @@ import SprintPlanner from './equipo/Sprints';
 import DailyEntry from './equipo/Dailys';
 import Retrospectiva from './equipo/Retrospectiva';
 import ConoceElMarcoEquipo from './equipo/MarcoEquipo';
+import GestionAgilPage from "./common/About";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/sobre-nosotros" element={<GestionAgilPage />} />
 
         {/* Admin */}
         <Route element={<PrivateRoute roles={[1]} />}>

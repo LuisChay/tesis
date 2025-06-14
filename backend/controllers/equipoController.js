@@ -76,6 +76,7 @@ module.exports = (connection) => {
         res.json({ message: "Sprint cerrado correctamente" });
       });
     },
+
     // Actualizar un sprint
     updateSprint: (req, res) => {
       const { id } = req.params;
@@ -165,13 +166,11 @@ module.exports = (connection) => {
       });
     },
 
-    // DAILYS
     // Crear una nueva entrada en Dailys con validación del grado
     createDaily: (req, res) => {
       const { fecha, usuario_id, ayer, avances, bloqueos, sprint_id } =
         req.body;
 
-      // Validación de campos obligatorios
       if (
         !fecha ||
         !usuario_id ||
@@ -183,7 +182,6 @@ module.exports = (connection) => {
         return res.status(400).json({ error: "Faltan campos obligatorios" });
       }
 
-      // Crear la entrada diaria sin validar el grado
       const sql = `
     INSERT INTO dailys (fecha, usuario_id, ayer, avances, bloqueos, sprint_id)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -341,7 +339,6 @@ module.exports = (connection) => {
         return res.status(400).json({ error: "Faltan campos obligatorios" });
       }
 
-      // No pedimos curso_id, lo obtenemos desde el sprint
       const sql = `
     INSERT INTO retrospectivas (sprint_id, usuario_id, puntos_buenos, puntos_mejorar, acciones_mejora, fecha)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -397,6 +394,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Actualizar retrospectiva
     updateRetrospectiva: (req, res) => {
       const { id } = req.params;
       const { puntos_buenos, puntos_mejorar, acciones_mejora, fecha } =
@@ -428,6 +426,7 @@ module.exports = (connection) => {
       );
     },
 
+    // Eliminar retrospectiva
     deleteRetrospectiva: (req, res) => {
       const { id } = req.params;
 
@@ -445,6 +444,7 @@ module.exports = (connection) => {
       });
     },
 
+    // Obtener retrospectivas por usuario y grado
     getRetrosByUsuarioAndGrado: (req, res) => {
       const { usuario_id, grado_id } = req.params;
 
@@ -475,40 +475,40 @@ module.exports = (connection) => {
         titulo,
         descripcion,
         prioridad,
-        estado,
         backlog_id,
         sprint_id,
         asignado_a,
       } = req.body;
 
-      if (!titulo || !prioridad || !backlog_id) {
-        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      if (!titulo || !backlog_id) {
+        return res
+          .status(400)
+          .json({ error: "Título y backlog_id son obligatorios" });
       }
 
       const sql = `
-    INSERT INTO tareas (titulo, descripcion, prioridad, estado, backlog_id, sprint_id, asignado_a)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
+        INSERT INTO tareas (titulo, descripcion, prioridad, estado, backlog_id, sprint_id, asignado_a)
+        VALUES (?, ?, ?, 'Por hacer', ?, ?, ?)
+      `;
 
       connection.query(
         sql,
         [
           titulo,
-          descripcion || "",
+          descripcion,
           prioridad,
-          estado || "Por hacer",
           backlog_id,
           sprint_id || null,
           asignado_a || null,
         ],
         (err, result) => {
           if (err) {
-            console.error("Error al insertar tarea:", err);
-            return res.status(500).json({ error: "Error al crear la tarea" });
+            console.error("Error al crear tarea:", err);
+            return res.status(500).json({ error: "Error al crear tarea" });
           }
           res.status(201).json({
-            id: result.insertId,
             message: "Tarea creada correctamente",
+            id: result.insertId,
           });
         }
       );
@@ -594,6 +594,8 @@ module.exports = (connection) => {
         res.json({ message: "Estado actualizado correctamente" });
       });
     },
+
+    // Marcar tarea como culminada
     culminarTarea: (req, res) => {
       const { id } = req.params;
 

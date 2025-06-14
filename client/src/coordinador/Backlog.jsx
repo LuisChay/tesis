@@ -21,17 +21,16 @@ const Backlog = () => {
   });
 
   const [currentPageTareas, setCurrentPageTareas] = useState(1);
-const ITEMS_PER_PAGE = 5; 
+  const ITEMS_PER_PAGE = 5;
   const startIndexTareas = (currentPageTareas - 1) * ITEMS_PER_PAGE;
-const endIndexTareas = startIndexTareas + ITEMS_PER_PAGE;
-const tareasPaginadas = tareas.slice(startIndexTareas, endIndexTareas);
-const totalPagesTareas = Math.ceil(tareas.length / ITEMS_PER_PAGE);
-// Número de tareas por página
-const cambiarPaginaTareas = (page) => {
-  if (page < 1 || page > totalPagesTareas) return;
-  setCurrentPageTareas(page);
-};
+  const endIndexTareas = startIndexTareas + ITEMS_PER_PAGE;
+  const tareasPaginadas = tareas.slice(startIndexTareas, endIndexTareas);
+  const totalPagesTareas = Math.ceil(tareas.length / ITEMS_PER_PAGE);
 
+  const cambiarPaginaTareas = (page) => {
+    if (page < 1 || page > totalPagesTareas) return;
+    setCurrentPageTareas(page);
+  };
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const creado_por = usuario?.id;
@@ -43,38 +42,46 @@ const cambiarPaginaTareas = (page) => {
       .catch(() => console.error("Error al cargar grados"));
   }, []);
 
+  useEffect(() => {
+    fetch("http://localhost:5100/admin/get-proyectos")
+      .then((res) => res.json())
+      .then((data) => {
+        const proyectosAsignados = data.filter(
+          (p) => p.responsable_id === creado_por
+        );
+        setProyectos(proyectosAsignados);
 
-useEffect(() => {
-  fetch("http://localhost:5100/admin/get-proyectos")
-    .then((res) => res.json())
-    .then((data) => {
-      const proyectosAsignados = data.filter(p => p.responsable_id === creado_por);
-      setProyectos(proyectosAsignados);
-
-      // ✅ Ahora cargamos tareas con proyectos ya listos
-      fetch(`http://localhost:5100/coord/get-backlog-by-user/${creado_por}`)
-        .then((res) => res.json())
-        .then((data) => {
-          const tareasConProyecto = data.map(t => {
-            const proyecto = proyectosAsignados.find(p => p.id === t.proyecto_id);
-            return {
-              ...t,
-              proyecto_id: t.proyecto_id,
-              proyecto: proyecto ? proyecto.titulo : "—"
-            };
+        fetch(`http://localhost:5100/coord/get-backlog-by-user/${creado_por}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const tareasConProyecto = data.map((t) => {
+              const proyecto = proyectosAsignados.find(
+                (p) => p.id === t.proyecto_id
+              );
+              return {
+                ...t,
+                proyecto_id: t.proyecto_id,
+                proyecto: proyecto ? proyecto.titulo : "—",
+              };
+            });
+            setTareas(tareasConProyecto);
           });
-          setTareas(tareasConProyecto);
-        });
-    })
-    .catch(() => console.error("Error al cargar proyectos o tareas"));
-}, [creado_por]);
-
-
-
+      })
+      .catch(() => console.error("Error al cargar proyectos o tareas"));
+  }, [creado_por]);
 
   const agregarTarea = async () => {
-    if (!formData.titulo || !formData.descripcion || !formData.curso || !formData.proyecto_id) {
-      return Swal.fire("Campos incompletos", "Debes llenar todos los campos", "warning");
+    if (
+      !formData.titulo ||
+      !formData.descripcion ||
+      !formData.curso ||
+      !formData.proyecto_id
+    ) {
+      return Swal.fire(
+        "Campos incompletos",
+        "Debes llenar todos los campos",
+        "warning"
+      );
     }
 
     try {
@@ -93,9 +100,10 @@ useEffect(() => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const gradoNombre = grados.find(g => g.id === Number(formData.curso))?.nombre || "—";
+      const gradoNombre =
+        grados.find((g) => g.id === Number(formData.curso))?.nombre || "—";
 
-      setTareas(prev => [
+      setTareas((prev) => [
         ...prev,
         {
           id: data.id,
@@ -115,16 +123,15 @@ useEffect(() => {
     }
   };
 
-const startEdit = (tarea) => {
-  setEditId(tarea.id);
-  setEditData({
-    titulo: tarea.titulo,
-    descripcion: tarea.descripcion,
-    curso_id: String(tarea.curso_id),
-    proyecto_id: String(tarea.proyecto_id ?? ""), // 🔧
-  });
-};
-
+  const startEdit = (tarea) => {
+    setEditId(tarea.id);
+    setEditData({
+      titulo: tarea.titulo,
+      descripcion: tarea.descripcion,
+      curso_id: String(tarea.curso_id),
+      proyecto_id: String(tarea.proyecto_id ?? ""), // 🔧
+    });
+  };
 
   const cancelEdit = () => {
     setEditId(null);
@@ -133,7 +140,7 @@ const startEdit = (tarea) => {
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditData(prev => ({ ...prev, [name]: value }));
+    setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
   const saveEdit = async () => {
@@ -147,32 +154,42 @@ const startEdit = (tarea) => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5100/coord/update-backlog/${editId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          titulo: editData.titulo,
-          descripcion: editData.descripcion,
-          curso_id: editData.curso_id,
-          proyecto_id: editData.proyecto_id,
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:5100/coord/update-backlog/${editId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            titulo: editData.titulo,
+            descripcion: editData.descripcion,
+            curso_id: editData.curso_id,
+            proyecto_id: editData.proyecto_id,
+          }),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const gradoNombre = grados.find(g => g.id === Number(editData.curso_id))?.nombre || "—";
+      const gradoNombre =
+        grados.find((g) => g.id === Number(editData.curso_id))?.nombre || "—";
 
-      const proyectoNombre = proyectos.find(p => p.id === Number(editData.proyecto_id))?.titulo || "—";
+      const proyectoNombre =
+        proyectos.find((p) => p.id === Number(editData.proyecto_id))?.titulo ||
+        "—";
 
-      setTareas(prev =>
-        prev.map(t =>
+      setTareas((prev) =>
+        prev.map((t) =>
           t.id === editId
-            ? { ...t, ...editData, grado: gradoNombre, proyecto: proyectoNombre }
+            ? {
+                ...t,
+                ...editData,
+                grado: gradoNombre,
+                proyecto: proyectoNombre,
+              }
             : t
         )
       );
-
 
       cancelEdit();
       Swal.fire("Actualizado", "Tarea actualizada correctamente", "success");
@@ -194,14 +211,17 @@ const startEdit = (tarea) => {
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5100/coord/delete-backlog/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://localhost:5100/coord/delete-backlog/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setTareas(prev => prev.filter(t => t.id !== id));
+      setTareas((prev) => prev.filter((t) => t.id !== id));
       Swal.fire("Eliminado", "Tarea eliminada correctamente", "success");
     } catch (err) {
       Swal.fire("Error", err.message, "error");
@@ -213,24 +233,33 @@ const startEdit = (tarea) => {
       <div className="max-w-6xl mx-auto p-6 my-10 space-y-10">
         {/* FORMULARIO DE CREACIÓN */}
         <div className="bg-white p-6 shadow-md rounded-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Crear nueva tarea del backlog</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+            Crear nueva tarea del ciclo
+          </h2>
           <div className="space-y-4">
             <input
               type="text"
               value={formData.titulo}
-              onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, titulo: e.target.value })
+              }
               placeholder="Título de la tarea"
               className="w-full border border-gray-300 rounded-md px-4 py-2"
             />
             <textarea
               value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-              placeholder="Descripción"
+              onChange={(e) =>
+                setFormData({ ...formData, descripcion: e.target.value })
+              }
+              placeholder="Descripción y objetivos"
               className="w-full border border-gray-300 rounded-md px-4 py-2"
             />
+
             <select
               value={formData.proyecto_id}
-              onChange={(e) => setFormData({ ...formData, proyecto_id: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, proyecto_id: e.target.value })
+              }
               className="w-full border border-gray-300 rounded-md px-4 py-2"
             >
               <option value="">Selecciona un proyecto</option>
@@ -244,13 +273,16 @@ const startEdit = (tarea) => {
             <div className="text-sm text-gray-600">
               Grado asignado por el administrador:{" "}
               <span className="font-semibold">
-                {proyectos.find(p => p.id === Number(formData.proyecto_id))?.grado || "—"}
+                {proyectos.find((p) => p.id === Number(formData.proyecto_id))
+                  ?.grado || "—"}
               </span>
             </div>
 
             <select
               value={formData.curso}
-              onChange={(e) => setFormData({ ...formData, curso: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, curso: e.target.value })
+              }
               className="w-full border border-gray-300 rounded-md px-4 py-2"
             >
               <option value="">Selecciona un grado</option>
@@ -272,12 +304,13 @@ const startEdit = (tarea) => {
 
         {/* TABLA DE TAREAS */}
         <div className="bg-white p-6 shadow-md rounded-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Tareas registradas</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+            Tareas registradas
+          </h2>
           <div className="overflow-x-auto">
             <table className="w-full table-auto text-sm border-collapse">
               <thead>
-                              <tr className="text-left bg-gray-100">
-
+                <tr className="text-left bg-gray-100">
                   <th className="px-4 py-2 border-b">Título</th>
                   <th className="px-4 py-2 border-b">Descripción</th>
                   <th className="px-4 py-2 border-b">Grado</th>
@@ -285,110 +318,133 @@ const startEdit = (tarea) => {
                   <th className="px-4 py-2 border-b">Acciones</th>
                 </tr>
               </thead>
-<tbody>
-  {tareasPaginadas.map((tarea) => (
-    <tr key={tarea.id} className="hover:bg-gray-50">
-      <td className="px-4 py-2 border-b">
-        {editId === tarea.id ? (
-          <input
-            type="text"
-            name="titulo"
-            value={editData.titulo}
-            onChange={handleEditChange}
-            className="w-full border border-gray-300 rounded px-2 py-1"
-          />
-        ) : tarea.titulo}
-      </td>
-      <td className="px-4 py-2 border-b">
-        {editId === tarea.id ? (
-          <textarea
-            name="descripcion"
-            value={editData.descripcion}
-            onChange={handleEditChange}
-            className="w-full border border-gray-300 rounded px-2 py-1"
-          />
-        ) : tarea.descripcion}
-      </td>
-      <td className="px-4 py-2 border-b">
-        {editId === tarea.id ? (
-          <select
-            name="curso_id"
-            value={editData.curso_id}
-            onChange={handleEditChange}
-            className="w-full border border-gray-300 rounded px-2 py-1"
-          >
-            {grados.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.nombre}
-              </option>
-            ))}
-          </select>
-        ) : tarea.grado || "—"}
-      </td>
-      <td className="px-4 py-2 border-b">
-        {editId === tarea.id ? (
-          <select
-            name="proyecto_id"
-            value={editData.proyecto_id}
-            onChange={handleEditChange}
-            className="w-full border border-gray-300 rounded px-2 py-1"
-          >
-            {proyectos.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.titulo}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <span>{tarea.proyecto || "—"}</span>
-        )}
-      </td>
+              <tbody>
+                {tareasPaginadas.map((tarea) => (
+                  <tr key={tarea.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 border-b">
+                      {editId === tarea.id ? (
+                        <input
+                          type="text"
+                          name="titulo"
+                          value={editData.titulo}
+                          onChange={handleEditChange}
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                        />
+                      ) : (
+                        tarea.titulo
+                      )}
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      {editId === tarea.id ? (
+                        <textarea
+                          name="descripcion"
+                          value={editData.descripcion}
+                          onChange={handleEditChange}
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                        />
+                      ) : (
+                        tarea.descripcion
+                      )}
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      {editId === tarea.id ? (
+                        <select
+                          name="curso_id"
+                          value={editData.curso_id}
+                          onChange={handleEditChange}
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                        >
+                          {grados.map((g) => (
+                            <option key={g.id} value={g.id}>
+                              {g.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        tarea.grado || "—"
+                      )}
+                    </td>
+                    <td className="px-4 py-2 border-b">
+                      {editId === tarea.id ? (
+                        <select
+                          name="proyecto_id"
+                          value={editData.proyecto_id}
+                          onChange={handleEditChange}
+                          className="w-full border border-gray-300 rounded px-2 py-1"
+                        >
+                          {proyectos.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.titulo}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span>{tarea.proyecto || "—"}</span>
+                      )}
+                    </td>
 
-      <td className="px-4 py-2 border-b space-x-4">
-        {editId === tarea.id ? (
-          <>
-            <button onClick={saveEdit} className="text-green-600 hover:underline">Guardar</button>
-            <button onClick={cancelEdit} className="text-gray-600 hover:underline">Cancelar</button>
-          </>
-        ) : (
-          <>
-            <button onClick={() => startEdit(tarea)} className="text-blue-600 hover:underline">Editar</button>
-            <button onClick={() => deleteTarea(tarea.id)} className="text-red-600 hover:underline">Eliminar</button>
-          </>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+                    <td className="px-4 py-2 border-b space-x-4">
+                      {editId === tarea.id ? (
+                        <>
+                          <button
+                            onClick={saveEdit}
+                            className="text-green-600 hover:underline"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="text-gray-600 hover:underline"
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => startEdit(tarea)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => deleteTarea(tarea.id)}
+                            className="text-red-600 hover:underline"
+                          >
+                            Eliminar
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
 
             {/* Paginador para tareas */}
-<div className="flex justify-between items-center mt-4">
-  <button
-    onClick={() => cambiarPaginaTareas(currentPageTareas - 1)}
-    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
-    disabled={currentPageTareas === 1}
-  >
-    Anterior
-  </button>
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() => cambiarPaginaTareas(currentPageTareas - 1)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+                disabled={currentPageTareas === 1}
+              >
+                Anterior
+              </button>
 
-  <span className="text-sm text-gray-700">
-    Página {currentPageTareas} de {totalPagesTareas}
-  </span>
+              <span className="text-sm text-gray-700">
+                Página {currentPageTareas} de {totalPagesTareas}
+              </span>
 
-  <button
-    onClick={() => cambiarPaginaTareas(currentPageTareas + 1)}
-    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
-    disabled={currentPageTareas === totalPagesTareas}
-  >
-    Siguiente
-  </button>
-</div>
-
+              <button
+                onClick={() => cambiarPaginaTareas(currentPageTareas + 1)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
+                disabled={currentPageTareas === totalPagesTareas}
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
         </div>
-        
       </div>
     </CoordinadorLayout>
   );

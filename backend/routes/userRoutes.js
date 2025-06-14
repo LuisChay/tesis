@@ -7,7 +7,6 @@ module.exports = (connection) => {
   // Login
   router.post('/login', usuarioController.login);
 
-
   // CRUD Usuarios
   router.get('/get-usuarios', usuarioController.getUsuarios);
   router.get('/get-usuario/:id', usuarioController.getUsuarioById);

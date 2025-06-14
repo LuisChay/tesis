@@ -11,6 +11,7 @@ module.exports = (connection) => {
   router.delete("/delete-backlog/:id", coordController.deleteBacklog);
   router.get("/get-backlog-by-user/:userId", coordController.getBacklogByUser);
   router.get("/get-backlog", coordController.getAllBacklog); // Obtener todas las actividades del backlog
+  router.get("/get-backlog-grado/:grado_id", coordController.getBacklogByGrado);
 
   // Evaluaciones
   router.post("/create-evaluacion", coordController.createEvaluacion);
@@ -26,10 +27,8 @@ module.exports = (connection) => {
   router.get("/reporte-actividad-backlog/:coordinador_id", coordController.getActividadBacklog);
   router.get("/reporte-ranking-estudiantes/:coordinador_id", coordController.getRankingGrados);
   router.get("/reporte-participacion-grado", coordController.getParticipacionDailysPorGrado);
-
   router.get("/reporte-cumplimiento-tareas/:coordinador_id", coordController.getCumplimientoTareas);
   router.get("/reporte-tareas-antiguas/:coordinador_id", coordController.getTareasAntiguasPendientes);
-
 
   return router;
 };

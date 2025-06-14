@@ -15,21 +15,27 @@ const AsignarGrados = () => {
 
   const cargarUsuarios = () => {
     fetch("http://localhost:5100/users/get-usuarios")
-      .then(res => res.json())
-      .then(data => setUsuarios(data.filter(u => u.rol_id !== 1)))
-      .catch(() => Swal.fire("Error", "No se pudieron cargar usuarios", "error"));
+      .then((res) => res.json())
+      .then((data) =>
+        setUsuarios(data.filter((u) => u.rol_id !== 1 && u.rol_id !== 2))
+      )
+      .catch(() =>
+        Swal.fire("Error", "No se pudieron cargar usuarios", "error")
+      );
   };
 
   const cargarGrados = () => {
     fetch("http://localhost:5100/admin/get-grados")
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setGrados)
-      .catch(() => Swal.fire("Error", "No se pudieron cargar los grados", "error"));
+      .catch(() =>
+        Swal.fire("Error", "No se pudieron cargar los grados", "error")
+      );
   };
 
   const cargarAsignaciones = (id) => {
     fetch(`http://localhost:5100/admin/get-grados-usuario/${id}`)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setAsignaciones)
       .catch(() => setAsignaciones([]));
   };
@@ -45,7 +51,11 @@ const AsignarGrados = () => {
 
   const asignarGrado = async () => {
     if (!usuarioSeleccionado || !gradoSeleccionado) {
-      return Swal.fire("Atención", "Debe seleccionar usuario y grado", "warning");
+      return Swal.fire(
+        "Atención",
+        "Debe seleccionar usuario y grado",
+        "warning"
+      );
     }
 
     const body = {
@@ -83,9 +93,12 @@ const AsignarGrados = () => {
     if (!confirm.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5100/admin/eliminar-asignacion/${usuarioSeleccionado}/${grado_id}`, {
-        method: "DELETE"
-      });
+      const res = await fetch(
+        `http://localhost:5100/admin/eliminar-asignacion/${usuarioSeleccionado}/${grado_id}`,
+        {
+          method: "DELETE",
+        }
+      );
       if (!res.ok) throw new Error("Error al eliminar");
       Swal.fire("Eliminado", "Asignación eliminada correctamente", "success");
       cargarAsignaciones(usuarioSeleccionado);
@@ -102,7 +115,9 @@ const AsignarGrados = () => {
   return (
     <AdminLayout>
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800 border-b pb-2">Asignación de grados a usuarios</h2>
+        <h2 className="text-2xl font-bold text-gray-800 border-b pb-2">
+          Asignación de grados a profesores
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <select
@@ -148,7 +163,9 @@ const AsignarGrados = () => {
             <h3 className="text-xl font-semibold mb-4">Grados asignados</h3>
 
             {asignaciones.length === 0 ? (
-              <p className="text-gray-500">Este usuario no tiene grados asignados.</p>
+              <p className="text-gray-500">
+                Este usuario no tiene grados asignados.
+              </p>
             ) : (
               <table className="w-full table-auto border-t">
                 <thead>
@@ -188,7 +205,9 @@ const AsignarGrados = () => {
                   Página {currentPage} de {totalPages}
                 </span>
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
                 >
