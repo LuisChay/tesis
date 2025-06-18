@@ -2,8 +2,6 @@
 
 > Plataforma web que implementa un marco ágil especializado para proyectos educativos, combinando principios de Scrum y Kanban adaptados al sector educativo.
 
-![Banner](https://via.placeholder.com/1200x300/0052CC/FFFFFF?text=EduÁgil+-+Marco+Ágil+Educativo)
-
 ## 📋 Descripción
 
 EduÁgil es una aplicación web fullstack desarrollada como parte de una tesis de ingeniería que adapta metodologías ágiles (Scrum y Kanban) específicamente para el sector educativo. La plataforma permite a instituciones educativas gestionar proyectos académicos de manera colaborativa, transparente y eficiente.
