@@ -2,6 +2,8 @@
 
 > Plataforma web que implementa un marco ágil especializado para proyectos educativos, combinando principios de Scrum y Kanban adaptados al sector educativo.
 
+![Banner](https://via.placeholder.com/1200x300/0052CC/FFFFFF?text=EduÁgil+-+Marco+Ágil+Educativo)
+
 ## 📋 Descripción
 
 EduÁgil es una aplicación web fullstack desarrollada como parte de una tesis de ingeniería que adapta metodologías ágiles (Scrum y Kanban) específicamente para el sector educativo. La plataforma permite a instituciones educativas gestionar proyectos académicos de manera colaborativa, transparente y eficiente.
@@ -52,3 +54,40 @@ EduÁgil es una aplicación web fullstack desarrollada como parte de una tesis d
 - **MySQL 8.0** - Sistema de gestión de base de datos
 - **JWT** - Autenticación basada en tokens
 
+## 🎯 Uso del Sistema
+
+### Para Administradores (Scrum Master)
+1. **Crear proyectos educativos** y asignar coordinadores
+2. **Gestionar usuarios** y roles del sistema
+3. **Monitorear progreso** general de la institución
+4. **Facilitar eventos** ágiles institucionales
+
+### Para Coordinadores (Product Owner)
+1. **Definir objetivos** de aprendizaje por área
+2. **Gestionar backlog** de actividades educativas
+3. **Priorizar tareas** según currículo y necesidades
+4. **Evaluar resultados** de aprendizaje
+
+### Para Equipos (Docentes/Estudiantes)
+1. **Participar en sprints** semanales
+2. **Gestionar tareas** en tablero Kanban
+3. **Reportar avances** en daily meetings
+4. **Reflexionar** en retrospectivas
+
+## 📚 Documentación Adicional
+
+- **[Manual de Usuario](docs/manual-usuario.md)** - Guía paso a paso para usar la plataforma
+- **[Manual Técnico](docs/manual-tecnico.md)** - Documentación técnica detallada
+- **[Tesis Completa](docs/tesis.pdf)** - Documento académico completo
+
+## 👨‍💻 Autor
+
+**Luis Manuel Chay Marroquín**
+- Estudiante de Ingeniería en Sistemas
+- Universidad de San Carlos de Guatemala
+
+
+## 🙏 Agradecimientos
+
+- **Universidad de San Carlos de Guatemala** - Facultad de Ingeniería
+- **Asesor de Tesis** - Jorge Luis Álvarez Mejía
