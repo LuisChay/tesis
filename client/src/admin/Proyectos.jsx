@@ -9,12 +9,7 @@ const AdminProyectos = () => {
   const [grados, setGrados] = useState([]);
   const [responsables, setResponsables] = useState([]);
 
-  const [nuevoGrado, setNuevoGrado] = useState("");
-  const [editGradoId, setEditGradoId] = useState(null);
-  const [editGradoNombre, setEditGradoNombre] = useState("");
-
-  const [currentPageGrados, setCurrentPageGrados] = useState(1); // Paginación para grados
-  const [currentPageProyectos, setCurrentPageProyectos] = useState(1); // Paginación para proyectos
+  const [currentPageProyectos, setCurrentPageProyectos] = useState(1);
 
   const [formProyecto, setFormProyecto] = useState({
     titulo: "",
@@ -35,11 +30,6 @@ const AdminProyectos = () => {
     fechaFin: "",
   });
 
-  const startIndexGrados = (currentPageGrados - 1) * ITEMS_PER_PAGE;
-  const endIndexGrados = startIndexGrados + ITEMS_PER_PAGE;
-  const gradosPaginados = grados.slice(startIndexGrados, endIndexGrados);
-  const totalPagesGrados = Math.ceil(grados.length / ITEMS_PER_PAGE);
-
   const startIndexProyectos = (currentPageProyectos - 1) * ITEMS_PER_PAGE;
   const endIndexProyectos = startIndexProyectos + ITEMS_PER_PAGE;
   const proyectosPaginados = proyectos.slice(
@@ -47,11 +37,6 @@ const AdminProyectos = () => {
     endIndexProyectos
   );
   const totalPagesProyectos = Math.ceil(proyectos.length / ITEMS_PER_PAGE);
-
-  const cambiarPaginaGrados = (page) => {
-    if (page < 1 || page > totalPagesGrados) return;
-    setCurrentPageGrados(page);
-  };
 
   const cambiarPaginaProyectos = (page) => {
     if (page < 1 || page > totalPagesProyectos) return;
@@ -120,85 +105,6 @@ const AdminProyectos = () => {
       );
   };
 
-  const agregarGrado = () => {
-    if (!nuevoGrado.trim()) {
-      return Swal.fire("Error", "Debe ingresar el nombre del grado", "warning");
-    }
-    fetch("http://localhost:5100/admin/create-grado", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: nuevoGrado.trim() }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error creando grado");
-        Swal.fire("Éxito", "Grado creado correctamente", "success");
-        setNuevoGrado("");
-        cargarGrados();
-      })
-      .catch((err) => Swal.fire("Error", err.message, "error"));
-  };
-
-  const iniciarEdicionGrado = (grado) => {
-    setEditGradoId(grado.id);
-    setEditGradoNombre(grado.nombre);
-  };
-
-  const cancelarEdicionGrado = () => {
-    setEditGradoId(null);
-    setEditGradoNombre("");
-  };
-
-  const guardarEdicionGrado = () => {
-    if (!editGradoNombre.trim()) {
-      return Swal.fire(
-        "Error",
-        "El nombre del grado no puede estar vacío",
-        "warning"
-      );
-    }
-    fetch(`http://localhost:5100/admin/update-grado/${editGradoId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: editGradoNombre.trim() }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error actualizando grado");
-        Swal.fire("Éxito", "Grado actualizado correctamente", "success");
-        cancelarEdicionGrado();
-        cargarGrados();
-      })
-      .catch((err) => Swal.fire("Error", err.message, "error"));
-  };
-
-  const eliminarGrado = (id) => {
-    Swal.fire({
-      title: "¿Estás seguro?",
-      text: "Esta acción eliminará el grado permanentemente.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const res = await fetch(
-            `http://localhost:5100/admin/delete-grado/${id}`,
-            { method: "DELETE" }
-          );
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Error eliminando grado");
-          Swal.fire("Eliminado", "Grado eliminado correctamente", "success");
-          if (editGradoId === id) cancelarEdicionGrado();
-          cargarGrados();
-        } catch (err) {
-          Swal.fire("Error", err.message, "error");
-        }
-      }
-    });
-  };
-
   const handleChangeProyecto = (e) => {
     const { name, value } = e.target;
     setFormProyecto((f) => ({ ...f, [name]: value }));
@@ -264,7 +170,7 @@ const AdminProyectos = () => {
     setEditProyectoData({
       titulo: proyecto.titulo || "",
       objetivo: proyecto.objetivo || "-",
-      grado: gradoEncontrado?.id?.toString() || "", // ← usamos el ID
+      grado: gradoEncontrado?.id?.toString() || "",
       responsable: responsableEncontrado?.id?.toString() || "",
       fechaInicio: (proyecto.fechaInicio || proyecto.fecha_inicio || "").slice(
         0,
@@ -357,125 +263,10 @@ const AdminProyectos = () => {
       }
     }
   };
+
   return (
     <AdminLayout>
       <div className="max-w-5xl mx-auto p-6 space-y-10">
-        {/* Crear grado y gestión con edición en tabla */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
-            Gestión de grados
-          </h2>
-          <div className="flex gap-3 mb-4">
-            <input
-              type="text"
-              placeholder="Nuevo grado"
-              className="flex-grow border px-4 py-2 rounded-md"
-              value={nuevoGrado}
-              onChange={(e) => setNuevoGrado(e.target.value)}
-              disabled={editGradoId !== null}
-            />
-            <button
-              onClick={agregarGrado}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-              disabled={editGradoId !== null}
-            >
-              Agregar Grado
-            </button>
-          </div>
-
-          {/* Tabla grados con paginación */}
-          <table className="w-full table-auto text-sm border-t pt-4">
-            <thead>
-              <tr className="text-left bg-gray-100">
-                <th className="py-2 px-3">Nombre</th>
-                <th className="py-2 px-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gradosPaginados.length === 0 ? (
-                <tr>
-                  <td colSpan={2} className="text-center py-4 text-gray-500">
-                    No hay grados creados aún.
-                  </td>
-                </tr>
-              ) : (
-                gradosPaginados.map((grado) => (
-                  <tr key={grado.id} className="border-t">
-                    <td className="py-2 px-3">
-                      {editGradoId === grado.id ? (
-                        <input
-                          type="text"
-                          value={editGradoNombre}
-                          onChange={(e) => setEditGradoNombre(e.target.value)}
-                          className="w-full border px-2 py-1 rounded"
-                        />
-                      ) : (
-                        grado.nombre
-                      )}
-                    </td>
-                    <td className="py-2 px-3 space-x-3">
-                      {editGradoId === grado.id ? (
-                        <>
-                          <button
-                            onClick={guardarEdicionGrado}
-                            className="text-yellow-600 hover:underline"
-                          >
-                            Guardar
-                          </button>
-                          <button
-                            onClick={cancelarEdicionGrado}
-                            className="text-gray-600 hover:underline"
-                          >
-                            Cancelar
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => iniciarEdicionGrado(grado)}
-                            className="text-blue-600 hover:underline"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => eliminarGrado(grado.id)}
-                            className="text-red-600 hover:underline"
-                          >
-                            Eliminar
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-
-          {/* Controles de paginación */}
-          <div className="flex justify-between items-center mt-4">
-            <button
-              onClick={() => cambiarPaginaGrados(currentPageGrados - 1)}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
-              disabled={currentPageGrados === 1}
-            >
-              Anterior
-            </button>
-
-            <span className="text-sm text-gray-700">
-              Página {currentPageGrados} de {totalPagesGrados}
-            </span>
-
-            <button
-              onClick={() => cambiarPaginaGrados(currentPageGrados + 1)}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-semibold rounded disabled:opacity-50"
-              disabled={currentPageGrados === totalPagesGrados}
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-
         {/* Formulario de creación de proyecto */}
         <div className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
@@ -708,4 +499,5 @@ const AdminProyectos = () => {
     </AdminLayout>
   );
 };
+
 export default AdminProyectos;

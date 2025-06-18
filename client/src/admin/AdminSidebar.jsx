@@ -106,7 +106,7 @@ const AdminSidebar = () => {
               className={linkClass("/admin/asignar-grados")}
               onClick={closeSidebar}
             >
-              Asignar grados
+              Gestión de grados
             </Link>
             <Link 
               to="/admin/crear-cuenta" 
