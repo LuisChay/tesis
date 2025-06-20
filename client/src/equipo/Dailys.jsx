@@ -19,10 +19,10 @@ const DailyEntry = () => {
 
   const [sprints, setSprints] = useState([]);
   const [sprint_id, setSprintId] = useState("");
-  const [gradoActual, setGradoActual] = useState(""); 
+  const [gradoActual, setGradoActual] = useState("");
 
   const [gradoFiltro, setGradoFiltro] = useState("");
-  const [gradoFormulario, setGradoFormulario] = useState(""); 
+  const [gradoFormulario, setGradoFormulario] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
@@ -30,6 +30,15 @@ const DailyEntry = () => {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const entradasPaginadas = entradas.slice(startIndex, endIndex);
   const totalPages = Math.ceil(entradas.length / ITEMS_PER_PAGE);
+  const [mostrarAlerta, setMostrarAlerta] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMostrarAlerta(false);
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const cambiarPagina = (page) => {
     if (page < 1 || page > totalPages) return;
@@ -227,6 +236,19 @@ const DailyEntry = () => {
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
           Reunión diaria (Daily)
         </h1>
+
+        {mostrarAlerta && (
+          <div className="mb-6">
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md">
+              <p className="text-sm">
+                📅 Recuerda que estas reuniones diarias deben realizarse cada{" "}
+                <strong>martes a jueves con una duración de 15 minutos</strong>{" "}
+                para sincronizar avances, identificar obstáculos y planificar el
+                día.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4 mb-8">
           <select

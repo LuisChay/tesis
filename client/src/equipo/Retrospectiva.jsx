@@ -14,10 +14,10 @@ const Retrospectiva = () => {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const usuario_id = usuario?.id;
 
-  const [gradoFiltro, setGradoFiltro] = useState(""); 
-  const [sprintSeleccionado, setSprintSeleccionado] = useState(""); 
-  const [gradoActual, setGradoActual] = useState(""); 
-  const [sprints, setSprints] = useState([]); 
+  const [gradoFiltro, setGradoFiltro] = useState("");
+  const [sprintSeleccionado, setSprintSeleccionado] = useState("");
+  const [gradoActual, setGradoActual] = useState("");
+  const [sprints, setSprints] = useState([]);
 
   const [retros, setRetros] = useState([]);
   const [editId, setEditId] = useState(null);
@@ -29,6 +29,16 @@ const Retrospectiva = () => {
     pagina * porPagina
   );
   const totalPaginas = Math.ceil(retros.length / porPagina);
+
+  const [mostrarAlerta, setMostrarAlerta] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMostrarAlerta(false);
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     fetch("http://localhost:5100/equipo/get-sprints")
@@ -188,6 +198,20 @@ const Retrospectiva = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
             Registrar Retrospectiva
           </h1>
+
+          {mostrarAlerta && (
+            <div className="mb-6">
+              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md">
+                <p className="text-sm">
+                  📅 Recuerda que esta reunión de retrospectiva debe realizarse
+                  cada <strong>viernes con una duración de 15 minutos</strong>{" "}
+                  para reflexionar sobre el proceso, identificar mejoras y
+                  planificar acciones.
+
+                </p>
+              </div>
+            </div>
+          )}
           <div className="grid gap-4">
             <select
               className="border px-3 py-2 rounded"

@@ -32,6 +32,16 @@ const SprintPlanner = () => {
   const sprintsPaginados = sprints.slice(startIndex, endIndex);
   const totalPages = Math.ceil(sprints.length / ITEMS_PER_PAGE);
 
+  const [mostrarAlerta, setMostrarAlerta] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMostrarAlerta(false);
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const cambiarPagina = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
@@ -213,6 +223,20 @@ const SprintPlanner = () => {
         <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
           Planificación de Sprints
         </h1>
+
+        {/* ALERTA */}
+        {mostrarAlerta && (
+          <div className="mb-6">
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md">
+              <p className="text-sm">
+                📅 Recuerda que esta 
+                reunión de planificación debe realizarse cada <strong>lunes con una
+                duración de 30 minutos</strong> para definir el objetivo de aprendizaje para la semana.
+                <br></br>También recuerda que el Sprint debe durar <strong>una semana.</strong>
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4 mb-8">
           <input
