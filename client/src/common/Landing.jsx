@@ -44,11 +44,6 @@ const LandingPage = () => {
       {/* Hero Section mejorado */}
       <div className="relative h-[500px] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-indigo-600/90 z-10"></div>
-        <img
-          src="/src/assets/banner.png"
-          alt="Banner educativo"
-          className="object-cover w-full h-full"
-        />
         <div className="absolute inset-0 z-20 flex items-center justify-center text-center">
           <div className="max-w-4xl px-6">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
