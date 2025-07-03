@@ -21,7 +21,7 @@ const AsignarGrados = () => {
   const [currentPageGrados, setCurrentPageGrados] = useState(1);
 
   const cargarUsuarios = () => {
-    fetch("http://localhost:5100/users/get-usuarios")
+    fetch("https://tesis-backend-3hgb.onrender.com/users/get-usuarios")
       .then((res) => res.json())
       .then((data) =>
         setUsuarios(data.filter((u) => u.rol_id !== 1 && u.rol_id !== 2))
@@ -32,7 +32,7 @@ const AsignarGrados = () => {
   };
 
   const cargarGrados = () => {
-    fetch("http://localhost:5100/admin/get-grados")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/get-grados")
       .then((res) => res.json())
       .then(setGrados)
       .catch(() =>
@@ -41,7 +41,7 @@ const AsignarGrados = () => {
   };
 
   const cargarAsignaciones = (id) => {
-    fetch(`http://localhost:5100/admin/get-grados-usuario/${id}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/admin/get-grados-usuario/${id}`)
       .then((res) => res.json())
       .then(setAsignaciones)
       .catch(() => setAsignaciones([]));
@@ -61,7 +61,7 @@ const AsignarGrados = () => {
     if (!nuevoGrado.trim()) {
       return Swal.fire("Error", "Debe ingresar el nombre del grado", "warning");
     }
-    fetch("http://localhost:5100/admin/create-grado", {
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/create-grado", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre: nuevoGrado.trim() }),
@@ -94,7 +94,7 @@ const AsignarGrados = () => {
         "warning"
       );
     }
-    fetch(`http://localhost:5100/admin/update-grado/${editGradoId}`, {
+    fetch(`https://tesis-backend-3hgb.onrender.com/admin/update-grado/${editGradoId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre: editGradoNombre.trim() }),
@@ -121,7 +121,7 @@ const AsignarGrados = () => {
       if (result.isConfirmed) {
         try {
           const res = await fetch(
-            `http://localhost:5100/admin/delete-grado/${id}`,
+            `https://tesis-backend-3hgb.onrender.com/admin/delete-grado/${id}`,
             { method: "DELETE" }
           );
           const data = await res.json();
@@ -151,7 +151,7 @@ const AsignarGrados = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:5100/admin/asignar-grado", {
+      const res = await fetch("https://tesis-backend-3hgb.onrender.com/admin/asignar-grado", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -181,7 +181,7 @@ const AsignarGrados = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/admin/eliminar-asignacion/${usuarioSeleccionado}/${grado_id}`,
+        `https://tesis-backend-3hgb.onrender.com/admin/eliminar-asignacion/${usuarioSeleccionado}/${grado_id}`,
         {
           method: "DELETE",
         }

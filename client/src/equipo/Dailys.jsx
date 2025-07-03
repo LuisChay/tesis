@@ -70,7 +70,7 @@ const DailyEntry = () => {
   useEffect(() => {
     if (!gradoFormulario) return;
 
-    fetch(`http://localhost:5100/equipo/get-sprints-grado/${gradoFormulario}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/equipo/get-sprints-grado/${gradoFormulario}`)
       .then((res) => res.json())
       .then((data) => {
         setSprints(data);
@@ -91,7 +91,7 @@ const DailyEntry = () => {
   useEffect(() => {
     if (usuario_id && gradoFiltro) {
       fetch(
-        `http://localhost:5100/equipo/get-dailys-usuario-grado/${usuario_id}/${gradoFiltro}`
+        `https://tesis-backend-3hgb.onrender.com/equipo/get-dailys-usuario-grado/${usuario_id}/${gradoFiltro}`
       )
         .then((res) => res.json())
         .then(setEntradas)
@@ -102,7 +102,7 @@ const DailyEntry = () => {
   }, [usuario_id, gradoFiltro]);
 
   useEffect(() => {
-    fetch("http://localhost:5100/equipo/get-sprints")
+    fetch("https://tesis-backend-3hgb.onrender.com/equipo/get-sprints")
       .then((res) => res.json())
       .then((data) => {
         setSprints(data);
@@ -129,7 +129,7 @@ const DailyEntry = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5100/equipo/create-daily", {
+      const res = await fetch("https://tesis-backend-3hgb.onrender.com/equipo/create-daily", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -143,7 +143,7 @@ const DailyEntry = () => {
       if (!res.ok) throw new Error(data.error);
 
       const nuevasEntradas = await fetch(
-        `http://localhost:5100/equipo/get-dailys/${usuario_id}`
+        `https://tesis-backend-3hgb.onrender.com/equipo/get-dailys/${usuario_id}`
       ).then((res) => res.json());
       setEntradas(nuevasEntradas);
       setForm({
@@ -179,7 +179,7 @@ const DailyEntry = () => {
   const saveEdit = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/update-daily/${editId}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/update-daily/${editId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -191,7 +191,7 @@ const DailyEntry = () => {
       if (!res.ok) throw new Error(data.error);
 
       const nuevasEntradas = await fetch(
-        `http://localhost:5100/equipo/get-dailys/${usuario_id}`
+        `https://tesis-backend-3hgb.onrender.com/equipo/get-dailys/${usuario_id}`
       ).then((res) => res.json());
       setEntradas(nuevasEntradas);
       setEditId(null);
@@ -214,7 +214,7 @@ const DailyEntry = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/delete-daily/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/delete-daily/${id}`,
         {
           method: "DELETE",
         }

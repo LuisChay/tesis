@@ -25,7 +25,7 @@ const EvaluacionContinua = () => {
   const [currentPageEvaluaciones, setCurrentPageEvaluaciones] = useState(1);
 
   useEffect(() => {
-    fetch("http://localhost:5100/coord/get-backlog-by-user/" + evaluadorId)
+    fetch("https://tesis-backend-3hgb.onrender.com/coord/get-backlog-by-user/" + evaluadorId)
       .then((res) => res.json())
       .then(setTareas)
       .catch(() => console.error("Error al cargar tareas"));
@@ -33,7 +33,7 @@ const EvaluacionContinua = () => {
 
   useEffect(() => {
     if (evaluadorId) {
-      fetch(`http://localhost:5100/coord/get-evaluaciones/${evaluadorId}`)
+      fetch(`https://tesis-backend-3hgb.onrender.com/coord/get-evaluaciones/${evaluadorId}`)
         .then((res) => res.json())
         .then(setEvaluaciones)
         .catch(() => console.error("Error al cargar las evaluaciones"));
@@ -69,7 +69,7 @@ const EvaluacionContinua = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5100/coord/create-evaluacion", {
+      const res = await fetch("https://tesis-backend-3hgb.onrender.com/coord/create-evaluacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -121,7 +121,7 @@ const EvaluacionContinua = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/coord/delete-evaluacion/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/coord/delete-evaluacion/${id}`,
         {
           method: "DELETE",
         }
@@ -166,7 +166,7 @@ const EvaluacionContinua = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/coord/update-evaluacion/${editId}`,
+        `https://tesis-backend-3hgb.onrender.com/coord/update-evaluacion/${editId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

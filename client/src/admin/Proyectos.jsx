@@ -50,7 +50,7 @@ const AdminProyectos = () => {
   }, []);
 
   const cargarGrados = () => {
-    fetch("http://localhost:5100/admin/get-grados")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/get-grados")
       .then((res) => res.json())
       .then(setGrados)
       .catch(() =>
@@ -79,7 +79,7 @@ const AdminProyectos = () => {
   };
 
   const cargarCoordinadores = () => {
-    fetch("http://localhost:5100/users/get-usuarios")
+    fetch("https://tesis-backend-3hgb.onrender.com/users/get-usuarios")
       .then((res) => res.json())
       .then((usuarios) =>
         setResponsables(usuarios.filter((u) => u.rol_id === 2))
@@ -90,7 +90,7 @@ const AdminProyectos = () => {
   };
 
   const cargarProyectos = () => {
-    fetch("http://localhost:5100/admin/get-proyectos")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/get-proyectos")
       .then((res) => res.json())
       .then((data) => {
         const proyectosFormateados = data.map((p) => ({
@@ -130,7 +130,7 @@ const AdminProyectos = () => {
       fecha_fin: formProyecto.fechaFin || null,
       actividades: "",
     };
-    fetch("http://localhost:5100/admin/create-proyecto", {
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/create-proyecto", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -207,7 +207,7 @@ const AdminProyectos = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/admin/update-proyecto/${editProyectoId}`,
+        `https://tesis-backend-3hgb.onrender.com/admin/update-proyecto/${editProyectoId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -249,7 +249,7 @@ const AdminProyectos = () => {
     if (confirm.isConfirmed) {
       try {
         const res = await fetch(
-          `http://localhost:5100/admin/delete-proyecto/${id}`,
+          `https://tesis-backend-3hgb.onrender.com/admin/delete-proyecto/${id}`,
           {
             method: "DELETE",
           }

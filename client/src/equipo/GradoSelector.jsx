@@ -5,7 +5,7 @@ const GradoSelector = ({ usuarioId, onSelect, gradoSeleccionado }) => {
 
   useEffect(() => {
     if (!usuarioId) return;
-    fetch(`http://localhost:5100/admin/get-grados-usuario/${usuarioId}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/admin/get-grados-usuario/${usuarioId}`)
       .then((res) => res.json())
       .then(setGrados)
       .catch(() => setGrados([]));

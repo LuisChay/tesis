@@ -41,7 +41,7 @@ const Retrospectiva = () => {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5100/equipo/get-sprints")
+    fetch("https://tesis-backend-3hgb.onrender.com/equipo/get-sprints")
       .then((res) => res.json())
       .then(setSprints)
       .catch(() =>
@@ -52,7 +52,7 @@ const Retrospectiva = () => {
   useEffect(() => {
     if (!usuario_id || !gradoFiltro) return;
     fetch(
-      `http://localhost:5100/equipo/get-retrospectivas-usuario-grado/${usuario_id}/${gradoFiltro}`
+      `https://tesis-backend-3hgb.onrender.com/equipo/get-retrospectivas-usuario-grado/${usuario_id}/${gradoFiltro}`
     )
       .then((res) => res.json())
       .then(setRetros)
@@ -101,7 +101,7 @@ const Retrospectiva = () => {
       return;
     }
 
-    fetch("http://localhost:5100/equipo/create-retrospectiva", {
+    fetch("https://tesis-backend-3hgb.onrender.com/equipo/create-retrospectiva", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -120,7 +120,7 @@ const Retrospectiva = () => {
           fecha: new Date().toISOString().split("T")[0],
         });
         return fetch(
-          `http://localhost:5100/equipo/get-retrospectivas-usuario-grado/${usuario_id}/${gradoFiltro}`
+          `https://tesis-backend-3hgb.onrender.com/equipo/get-retrospectivas-usuario-grado/${usuario_id}/${gradoFiltro}`
         );
       })
       .then((res) => res.json())
@@ -147,7 +147,7 @@ const Retrospectiva = () => {
   const saveEdit = async (id) => {
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/update-retrospectiva/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/update-retrospectiva/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -180,7 +180,7 @@ const Retrospectiva = () => {
       confirmButtonText: "Sí, eliminar",
     }).then((res) => {
       if (res.isConfirmed) {
-        fetch(`http://localhost:5100/equipo/delete-retrospectiva/${id}`, {
+        fetch(`https://tesis-backend-3hgb.onrender.com/equipo/delete-retrospectiva/${id}`, {
           method: "DELETE",
         }).then(() => {
           setRetros(retros.filter((r) => r.id !== id));

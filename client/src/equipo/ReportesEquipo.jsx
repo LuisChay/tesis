@@ -51,7 +51,7 @@ const ReportesEquipo = () => {
   const [gradoSeleccionado, setGradoSeleccionado] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5100/admin/get-grados-usuario/${usuario_id}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/admin/get-grados-usuario/${usuario_id}`)
       .then((res) => res.json())
       .then(setGrados)
       .catch(() => console.error("Error al cargar grados"));
@@ -60,7 +60,7 @@ const ReportesEquipo = () => {
   useEffect(() => {
     if (!gradoSeleccionado) return;
 
-    const base = `http://localhost:5100/equipo/reportes`;
+    const base = `https://tesis-backend-3hgb.onrender.com/equipo/reportes`;
 
     fetch(`${base}/tareas-por-grado/${gradoSeleccionado}`)
       .then((res) => res.json())

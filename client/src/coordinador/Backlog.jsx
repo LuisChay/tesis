@@ -36,14 +36,14 @@ const Backlog = () => {
   const creado_por = usuario?.id;
 
   useEffect(() => {
-    fetch("http://localhost:5100/admin/get-grados")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/get-grados")
       .then((res) => res.json())
       .then(setGrados)
       .catch(() => console.error("Error al cargar grados"));
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5100/admin/get-proyectos")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/get-proyectos")
       .then((res) => res.json())
       .then((data) => {
         const proyectosAsignados = data.filter(
@@ -51,7 +51,7 @@ const Backlog = () => {
         );
         setProyectos(proyectosAsignados);
 
-        fetch(`http://localhost:5100/coord/get-backlog-by-user/${creado_por}`)
+        fetch(`https://tesis-backend-3hgb.onrender.com/coord/get-backlog-by-user/${creado_por}`)
           .then((res) => res.json())
           .then((data) => {
             const tareasConProyecto = data.map((t) => {
@@ -85,7 +85,7 @@ const Backlog = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5100/coord/create-backlog", {
+      const res = await fetch("https://tesis-backend-3hgb.onrender.com/coord/create-backlog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -155,7 +155,7 @@ const Backlog = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/coord/update-backlog/${editId}`,
+        `https://tesis-backend-3hgb.onrender.com/coord/update-backlog/${editId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -212,7 +212,7 @@ const Backlog = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/coord/delete-backlog/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/coord/delete-backlog/${id}`,
         {
           method: "DELETE",
         }

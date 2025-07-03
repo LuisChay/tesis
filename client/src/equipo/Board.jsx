@@ -34,14 +34,14 @@ const KanbanBoard = () => {
     }
 
 
-    fetch(`http://localhost:5100/coord/get-backlog-grado/${gradoSeleccionado}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/coord/get-backlog-grado/${gradoSeleccionado}`)
       .then((res) => res.json())
       .then(setBacklog)
       .catch(() => console.error("Error al cargar backlog"));
   }, [gradoSeleccionado]);
 
   useEffect(() => {
-    fetch("http://localhost:5100/admin/get-grados")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/get-grados")
       .then((res) => res.json())
       .then(setGrados)
       .catch(() => console.error("Error al cargar grados"));
@@ -55,7 +55,7 @@ const KanbanBoard = () => {
       return;
     }
 
-    fetch(`http://localhost:5100/equipo/get-sprints-grado/${gradoSeleccionado}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/equipo/get-sprints-grado/${gradoSeleccionado}`)
       .then((res) => res.json())
       .then(setSprints)
       .catch(() => console.error("Error al cargar sprints"));
@@ -64,7 +64,7 @@ const KanbanBoard = () => {
   useEffect(() => {
     if (!gradoSeleccionado) return;
 
-    fetch(`http://localhost:5100/equipo/get-tareas/${gradoSeleccionado}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/equipo/get-tareas/${gradoSeleccionado}`)
       .then((res) => res.json())
       .then((tareas) => {
         // Organiza las tareas por estado
@@ -88,7 +88,7 @@ const KanbanBoard = () => {
   const finalizarTarea = async (id) => {
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/culminar-tarea/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/culminar-tarea/${id}`,
         {
           method: "PUT",
         }
@@ -127,7 +127,7 @@ const KanbanBoard = () => {
         asignado_a: null,
       };
 
-      const res = await fetch("http://localhost:5100/equipo/create-tarea", {
+      const res = await fetch("https://tesis-backend-3hgb.onrender.com/equipo/create-tarea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevaTarea),
@@ -138,7 +138,7 @@ const KanbanBoard = () => {
 
 
       if (gradoSeleccionado) {
-        fetch(`http://localhost:5100/equipo/get-tareas/${gradoSeleccionado}`)
+        fetch(`https://tesis-backend-3hgb.onrender.com/equipo/get-tareas/${gradoSeleccionado}`)
           .then((res) => res.json())
           .then((tareas) => {
             const nuevasColumnas = {
@@ -208,7 +208,7 @@ const KanbanBoard = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/update-estado/${movedItem.id}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/update-estado/${movedItem.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

@@ -42,7 +42,7 @@ const ReportesCoord = () => {
   const [participacionGrados, setParticipacionGrados] = useState([]);
 
   useEffect(() => {
-    const base = `http://localhost:5100/coord`;
+    const base = `https://tesis-backend-3hgb.onrender.com/coord`;
     fetch(`${base}/reporte-tareas-estado/${coordinador_id}`)
       .then((res) => res.json())
       .then(setTareasEstado);

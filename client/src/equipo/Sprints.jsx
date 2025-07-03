@@ -72,7 +72,7 @@ const SprintPlanner = () => {
     const usuario_id = JSON.parse(localStorage.getItem("usuario"))?.id;
     if (!usuario_id) return;
 
-    fetch(`http://localhost:5100/admin/get-grados-usuario/${usuario_id}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/admin/get-grados-usuario/${usuario_id}`)
       .then((res) => res.json())
       .then(setGrados)
       .catch(() =>
@@ -82,7 +82,7 @@ const SprintPlanner = () => {
 
   useEffect(() => {
     if (!gradoFiltro) return;
-    fetch(`http://localhost:5100/equipo/get-sprints-grado/${gradoFiltro}`)
+    fetch(`https://tesis-backend-3hgb.onrender.com/equipo/get-sprints-grado/${gradoFiltro}`)
       .then((res) => res.json())
       .then(setSprints)
       .catch(() => console.error("Error al cargar sprints filtrados"));
@@ -104,7 +104,7 @@ const SprintPlanner = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5100/equipo/create-sprint", {
+      const res = await fetch("https://tesis-backend-3hgb.onrender.com/equipo/create-sprint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -153,7 +153,7 @@ const SprintPlanner = () => {
   const saveEdit = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/update-sprint/${editId}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/update-sprint/${editId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -200,7 +200,7 @@ const SprintPlanner = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/equipo/delete-sprint/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/equipo/delete-sprint/${id}`,
         {
           method: "DELETE",
         }

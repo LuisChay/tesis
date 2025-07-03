@@ -25,7 +25,7 @@ const EditarUsuarios = () => {
   const [currentPageUsuarios, setCurrentPageUsuarios] = useState(1);
 
   useEffect(() => {
-    fetch("http://localhost:5100/users/get-usuarios")
+    fetch("https://tesis-backend-3hgb.onrender.com/users/get-usuarios")
       .then((res) => res.json())
       .then(setUsuarios)
       .catch(() => {
@@ -63,7 +63,7 @@ const EditarUsuarios = () => {
       }
 
       const res = await fetch(
-        `http://localhost:5100/users/update-usuario/${editUserId}`,
+        `https://tesis-backend-3hgb.onrender.com/users/update-usuario/${editUserId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -119,7 +119,7 @@ const EditarUsuarios = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5100/users/delete-usuario/${id}`,
+        `https://tesis-backend-3hgb.onrender.com/users/delete-usuario/${id}`,
         {
           method: "DELETE",
         }

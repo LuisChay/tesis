@@ -34,31 +34,31 @@ const ReportesAdmin = () => {
   const [feedback, setFeedback] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5100/admin/reporte-proyectos")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-proyectos")
       .then((res) => res.json())
       .then(setProyectos);
-    fetch("http://localhost:5100/admin/reporte-tareas")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-tareas")
       .then((res) => res.json())
       .then(setTareas);
-    fetch("http://localhost:5100/admin/reporte-evaluaciones")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-evaluaciones")
       .then((res) => res.json())
       .then(setEvaluaciones);
-    fetch("http://localhost:5100/admin/reporte-retrospectivas")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-retrospectivas")
       .then((res) => res.json())
       .then(setRetros);
-    fetch("http://localhost:5100/admin/reporte-backlog")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-backlog")
       .then((res) => res.json())
       .then(setBacklog);
-    fetch("http://localhost:5100/admin/reporte-proyectos-estado")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-proyectos-estado")
       .then((res) => res.json())
       .then(setEstadoProy);
-    fetch("http://localhost:5100/admin/reporte-desempeno")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-desempeno")
       .then((res) => res.json())
       .then(setRanking);
-    fetch("http://localhost:5100/admin/reporte-cumplimiento-sprint")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-cumplimiento-sprint")
       .then((res) => res.json())
       .then(setCumplimiento);
-    fetch("http://localhost:5100/admin/reporte-feedback")
+    fetch("https://tesis-backend-3hgb.onrender.com/admin/reporte-feedback")
       .then((res) => res.json())
       .then(setFeedback);
   }, []);

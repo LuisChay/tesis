@@ -25,7 +25,7 @@ const CrearCuenta = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5100/users/create-usuario",
+        "https://tesis-backend-3hgb.onrender.com/users/create-usuario",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
