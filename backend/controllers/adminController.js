@@ -20,7 +20,8 @@ module.exports = (connection) => {
           console.error("Error en getProyectos:", err);
           return res.status(500).json({ error: "Error al obtener proyectos" });
         }
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -128,7 +129,8 @@ module.exports = (connection) => {
       connection.query(sql, (err, results) => {
         if (err)
           return res.status(500).json({ error: "Error al obtener grados" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -199,7 +201,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener resumen de proyectos" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -221,7 +224,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener resumen de tareas" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+res.json(data);
       });
     },
 
@@ -242,7 +246,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener promedios de evaluación" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+res.json(data);
       });
     },
     
@@ -265,7 +270,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener retrospectivas" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -287,7 +293,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener progreso del backlog" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -308,7 +315,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener estado de proyectos" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -329,7 +337,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener ranking de desempeño" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -353,7 +362,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener cumplimiento por sprint" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -375,7 +385,8 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener retroalimentaciones" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
@@ -393,7 +404,8 @@ module.exports = (connection) => {
       connection.query(sql, [usuario_id], (err, results) => {
         if (err)
           return res.status(500).json({ error: "Error al obtener grados" });
-        res.json(results);
+        const data = results.rows ? results.rows : results;
+        res.json(data);
       });
     },
 
