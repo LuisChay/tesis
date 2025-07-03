@@ -379,4 +379,4 @@ process.on('SIGTERM', async () => {
 
 app.listen(port, () => {
   console.log(`🚀 El servidor está corriendo en el puerto ${port}`);
-});!
+});
