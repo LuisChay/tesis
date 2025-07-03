@@ -175,17 +175,15 @@ INSERT INTO roles (id, nombre) VALUES
 SELECT setval('roles_id_seq', (SELECT MAX(id) FROM roles));
 
 -- Insert data for grados (using negative IDs as in original)
--- First, allow negative values by altering the sequence
-ALTER SEQUENCE grados_id_seq RESTART WITH -4;
-
+-- First, temporarily disable the sequence and insert manually
 INSERT INTO grados (id, nombre) VALUES 
 (-4, 'Pre Primaria'),
 (-3, 'Primaria'),
 (-2, 'Básico'),
 (-1, 'Bachillerato');
 
--- Reset sequence to positive values for future inserts
-SELECT setval('grados_id_seq', 1);
+-- Reset sequence to start from 1 for future inserts
+SELECT setval('grados_id_seq', 1, false);
 
 -- Insert data for usuarios
 INSERT INTO usuarios (id, nombre_completo, correo, contrasena, rol_id, curso_id) VALUES 
