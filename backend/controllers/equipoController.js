@@ -23,7 +23,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener los sprints" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -36,9 +36,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    INSERT INTO sprints (nombre, fecha_inicio, fecha_fin, objetivo, curso_id)
-    VALUES (?, ?, ?, ?, ?)
-  `;
+        INSERT INTO sprints (nombre, fecha_inicio, fecha_fin, objetivo, curso_id)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
+      `;
 
       connection.query(
         sql,
@@ -50,7 +51,7 @@ module.exports = (connection) => {
           }
 
           res.status(201).json({
-            id: result.insertId,
+            id: result.rows[0].id,
             message: "Sprint creado correctamente",
           });
         }
@@ -64,7 +65,7 @@ module.exports = (connection) => {
       const sql = `
         UPDATE sprints
         SET estado = 'Cerrado'
-        WHERE id = ?
+        WHERE id = $1
       `;
 
       connection.query(sql, [id], (err, result) => {
@@ -87,10 +88,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    UPDATE sprints
-    SET nombre = ?, fecha_inicio = ?, fecha_fin = ?, objetivo = ?, curso_id = ?
-    WHERE id = ?
-  `;
+        UPDATE sprints
+        SET nombre = $1, fecha_inicio = $2, fecha_fin = $3, objetivo = $4, curso_id = $5
+        WHERE id = $6
+      `;
 
       connection.query(
         sql,
@@ -112,7 +113,7 @@ module.exports = (connection) => {
     deleteSprint: (req, res) => {
       const { id } = req.params;
 
-      const sql = `DELETE FROM sprints WHERE id = ?`;
+      const sql = `DELETE FROM sprints WHERE id = $1`;
 
       connection.query(sql, [id], (err) => {
         if (err) {
@@ -129,19 +130,19 @@ module.exports = (connection) => {
     getSprintsByGrado: (req, res) => {
       const { grado_id } = req.params;
       const sql = `
-    SELECT s.*, g.nombre AS grado
-    FROM sprints s
-    LEFT JOIN grados g ON s.curso_id = g.id
-    WHERE s.curso_id = ?
-    ORDER BY s.fecha_inicio DESC
-  `;
+        SELECT s.*, g.nombre AS grado
+        FROM sprints s
+        LEFT JOIN grados g ON s.curso_id = g.id
+        WHERE s.curso_id = $1
+        ORDER BY s.fecha_inicio DESC
+      `;
 
       connection.query(sql, [grado_id], (err, results) => {
         if (err) {
           console.error("Error al obtener sprints por grado:", err);
           return res.status(500).json({ error: "Error al obtener sprints" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -149,11 +150,11 @@ module.exports = (connection) => {
       const { grado_id } = req.params;
 
       const sql = `
-    SELECT id, nombre
-    FROM sprints
-    WHERE curso_id = ?
-    ORDER BY fecha_inicio DESC
-  `;
+        SELECT id, nombre
+        FROM sprints
+        WHERE curso_id = $1
+        ORDER BY fecha_inicio DESC
+      `;
 
       connection.query(sql, [grado_id], (err, results) => {
         if (err) {
@@ -162,7 +163,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener sprints por grado" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -183,9 +184,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    INSERT INTO dailys (fecha, usuario_id, ayer, avances, bloqueos, sprint_id)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
+        INSERT INTO dailys (fecha, usuario_id, ayer, avances, bloqueos, sprint_id)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+      `;
 
       connection.query(
         sql,
@@ -198,7 +200,7 @@ module.exports = (connection) => {
               .json({ error: "Error al crear la entrada diaria" });
           }
           res.status(201).json({
-            id: result.insertId,
+            id: result.rows[0].id,
             message: "Entrada diaria registrada correctamente",
           });
         }
@@ -210,13 +212,13 @@ module.exports = (connection) => {
       const { usuario_id } = req.params;
 
       const sql = `
-    SELECT d.id, d.fecha, d.ayer, d.avances, d.bloqueos, g.nombre AS grado
-    FROM dailys d
-    LEFT JOIN sprints s ON d.sprint_id = s.id
-    LEFT JOIN grados g ON s.curso_id = g.id
-    WHERE d.usuario_id = ?
-    ORDER BY d.fecha DESC
-  `;
+        SELECT d.id, d.fecha, d.ayer, d.avances, d.bloqueos, g.nombre AS grado
+        FROM dailys d
+        LEFT JOIN sprints s ON d.sprint_id = s.id
+        LEFT JOIN grados g ON s.curso_id = g.id
+        WHERE d.usuario_id = $1
+        ORDER BY d.fecha DESC
+      `;
 
       connection.query(sql, [usuario_id], (err, results) => {
         if (err) {
@@ -225,7 +227,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener las entradas diarias" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -247,10 +249,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    UPDATE dailys
-    SET fecha = ?, usuario_id = ?, ayer = ?, avances = ?, bloqueos = ?, sprint_id = ?
-    WHERE id = ?
-  `;
+        UPDATE dailys
+        SET fecha = $1, usuario_id = $2, ayer = $3, avances = $4, bloqueos = $5, sprint_id = $6
+        WHERE id = $7
+      `;
 
       const values = [
         fecha,
@@ -277,7 +279,7 @@ module.exports = (connection) => {
     deleteDaily: (req, res) => {
       const { id } = req.params;
 
-      const sql = "DELETE FROM dailys WHERE id = ?";
+      const sql = "DELETE FROM dailys WHERE id = $1";
 
       connection.query(sql, [id], (err) => {
         if (err) {
@@ -294,16 +296,15 @@ module.exports = (connection) => {
       const { usuario_id, grado_id } = req.params;
 
       const sql = `
-      SELECT d.id, d.fecha, d.ayer, d.avances, d.bloqueos,
-            g.nombre AS grado,
-            s.nombre AS sprint
-      FROM dailys d
-      INNER JOIN sprints s ON d.sprint_id = s.id
-      INNER JOIN grados g ON s.curso_id = g.id
-      WHERE d.usuario_id = ? AND g.id = ?
-      ORDER BY d.fecha DESC
-
-  `;
+        SELECT d.id, d.fecha, d.ayer, d.avances, d.bloqueos,
+               g.nombre AS grado,
+               s.nombre AS sprint
+        FROM dailys d
+        INNER JOIN sprints s ON d.sprint_id = s.id
+        INNER JOIN grados g ON s.curso_id = g.id
+        WHERE d.usuario_id = $1 AND g.id = $2
+        ORDER BY d.fecha DESC
+      `;
 
       connection.query(sql, [usuario_id, grado_id], (err, results) => {
         if (err) {
@@ -312,7 +313,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener entradas diarias" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -340,9 +341,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    INSERT INTO retrospectivas (sprint_id, usuario_id, puntos_buenos, puntos_mejorar, acciones_mejora, fecha)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
+        INSERT INTO retrospectivas (sprint_id, usuario_id, puntos_buenos, puntos_mejorar, acciones_mejora, fecha)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+      `;
 
       connection.query(
         sql,
@@ -364,7 +366,7 @@ module.exports = (connection) => {
 
           res.status(201).json({
             message: "Retrospectiva registrada correctamente",
-            id: result.insertId,
+            id: result.rows[0].id,
           });
         }
       );
@@ -375,13 +377,13 @@ module.exports = (connection) => {
       const { usuario_id } = req.params;
 
       const sql = `
-    SELECT r.*, s.nombre AS sprint, g.nombre AS grado
-    FROM retrospectivas r
-    LEFT JOIN sprints s ON r.sprint_id = s.id
-    LEFT JOIN grados g ON s.curso_id = g.id
-    WHERE r.usuario_id = ?
-    ORDER BY r.fecha DESC
-  `;
+        SELECT r.*, s.nombre AS sprint, g.nombre AS grado
+        FROM retrospectivas r
+        LEFT JOIN sprints s ON r.sprint_id = s.id
+        LEFT JOIN grados g ON s.curso_id = g.id
+        WHERE r.usuario_id = $1
+        ORDER BY r.fecha DESC
+      `;
 
       connection.query(sql, [usuario_id], (err, results) => {
         if (err) {
@@ -390,7 +392,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener retrospectivas" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -405,10 +407,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    UPDATE retrospectivas
-    SET puntos_buenos = ?, puntos_mejorar = ?, acciones_mejora = ?, fecha = ?
-    WHERE id = ?
-  `;
+        UPDATE retrospectivas
+        SET puntos_buenos = $1, puntos_mejorar = $2, acciones_mejora = $3, fecha = $4
+        WHERE id = $5
+      `;
 
       connection.query(
         sql,
@@ -430,7 +432,7 @@ module.exports = (connection) => {
     deleteRetrospectiva: (req, res) => {
       const { id } = req.params;
 
-      const sql = "DELETE FROM retrospectivas WHERE id = ?";
+      const sql = "DELETE FROM retrospectivas WHERE id = $1";
 
       connection.query(sql, [id], (err) => {
         if (err) {
@@ -449,13 +451,13 @@ module.exports = (connection) => {
       const { usuario_id, grado_id } = req.params;
 
       const sql = `
-    SELECT r.*, g.nombre AS grado
-    FROM retrospectivas r
-    LEFT JOIN sprints s ON r.sprint_id = s.id
-    LEFT JOIN grados g ON s.curso_id = g.id
-    WHERE r.usuario_id = ? AND g.id = ?
-    ORDER BY r.fecha DESC
-  `;
+        SELECT r.*, g.nombre AS grado
+        FROM retrospectivas r
+        LEFT JOIN sprints s ON r.sprint_id = s.id
+        LEFT JOIN grados g ON s.curso_id = g.id
+        WHERE r.usuario_id = $1 AND g.id = $2
+        ORDER BY r.fecha DESC
+      `;
 
       connection.query(sql, [usuario_id, grado_id], (err, results) => {
         if (err) {
@@ -464,7 +466,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener retrospectivas" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -488,7 +490,8 @@ module.exports = (connection) => {
 
       const sql = `
         INSERT INTO tareas (titulo, descripcion, prioridad, estado, backlog_id, sprint_id, asignado_a)
-        VALUES (?, ?, ?, 'Por hacer', ?, ?, ?)
+        VALUES ($1, $2, $3, 'Por hacer', $4, $5, $6)
+        RETURNING id
       `;
 
       connection.query(
@@ -508,7 +511,7 @@ module.exports = (connection) => {
           }
           res.status(201).json({
             message: "Tarea creada correctamente",
-            id: result.insertId,
+            id: result.rows[0].id,
           });
         }
       );
@@ -525,8 +528,7 @@ module.exports = (connection) => {
           b.titulo AS padre
         FROM tareas t
         LEFT JOIN backlog b ON t.backlog_id = b.id
-        WHERE b.curso_id = ? AND estado != 'Culminado'
-
+        WHERE b.curso_id = $1 AND estado != 'Culminado'
       `;
 
       connection.query(sql, [curso_id], (err, results) => {
@@ -534,7 +536,7 @@ module.exports = (connection) => {
           return res
             .status(500)
             .json({ error: "Error al obtener tareas por curso" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -545,8 +547,8 @@ module.exports = (connection) => {
 
       const sql = `
         UPDATE tareas
-        SET titulo = ?, descripcion = ?, prioridad = ?, estado = ?
-        WHERE id = ?
+        SET titulo = $1, descripcion = $2, prioridad = $3, estado = $4
+        WHERE id = $5
       `;
 
       connection.query(
@@ -566,7 +568,7 @@ module.exports = (connection) => {
     deleteTarea: (req, res) => {
       const { id } = req.params;
 
-      const sql = `DELETE FROM tareas WHERE id = ?`;
+      const sql = `DELETE FROM tareas WHERE id = $1`;
 
       connection.query(sql, [id], (err) => {
         if (err)
@@ -584,7 +586,7 @@ module.exports = (connection) => {
         return res.status(400).json({ error: "El estado es requerido" });
       }
 
-      const sql = `UPDATE tareas SET estado = ? WHERE id = ?`;
+      const sql = `UPDATE tareas SET estado = $1 WHERE id = $2`;
 
       connection.query(sql, [estado, id], (err) => {
         if (err) {
@@ -600,10 +602,10 @@ module.exports = (connection) => {
       const { id } = req.params;
 
       const sql = `
-    UPDATE tareas
-    SET estado = 'Culminado'
-    WHERE id = ?
-  `;
+        UPDATE tareas
+        SET estado = 'Culminado'
+        WHERE id = $1
+      `;
 
       connection.query(sql, [id], (err) => {
         if (err) {
@@ -621,15 +623,15 @@ module.exports = (connection) => {
     getTareasPorGrado: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-      SELECT estado, COUNT(*) AS total
-      FROM tareas t
-      JOIN backlog b ON t.backlog_id = b.id
-      WHERE b.curso_id = ?
-      GROUP BY estado;
-    `;
+        SELECT estado, COUNT(*) AS total
+        FROM tareas t
+        JOIN backlog b ON t.backlog_id = b.id
+        WHERE b.curso_id = $1
+        GROUP BY estado;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -637,16 +639,16 @@ module.exports = (connection) => {
     getEvaluacionesPorGrado: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-      SELECT g.nombre AS grado, ROUND(AVG(e.nota), 2) AS promedio_nota
-      FROM grados g
-      JOIN backlog b ON b.curso_id = g.id
-      JOIN evaluaciones e ON e.tarea_id = b.id
-      WHERE g.id = ?
-      GROUP BY g.nombre;
-    `;
+        SELECT g.nombre AS grado, ROUND(AVG(e.nota), 2) AS promedio_nota
+        FROM grados g
+        JOIN backlog b ON b.curso_id = g.id
+        JOIN evaluaciones e ON e.tarea_id = b.id
+        WHERE g.id = $1
+        GROUP BY g.nombre;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -655,19 +657,18 @@ module.exports = (connection) => {
       const grado_id = req.params.grado_id;
 
       const sql = `
-SELECT g.nombre AS grado, COUNT(d.id) AS total_dailys
-FROM dailys d
-JOIN usuarios u ON d.usuario_id = u.id
-JOIN usuario_grado ug ON ug.usuario_id = u.id
-JOIN grados g ON ug.grado_id = g.id
-WHERE g.id = ?
-GROUP BY g.nombre;
-
-  `;
+        SELECT g.nombre AS grado, COUNT(d.id) AS total_dailys
+        FROM dailys d
+        JOIN usuarios u ON d.usuario_id = u.id
+        JOIN usuario_grado ug ON ug.usuario_id = u.id
+        JOIN grados g ON ug.grado_id = g.id
+        WHERE g.id = $1
+        GROUP BY g.nombre;
+      `;
 
       connection.query(sql, [grado_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -676,18 +677,17 @@ GROUP BY g.nombre;
       const grado_id = req.params.grado_id;
 
       const sql = `
-SELECT g.nombre AS grado, ROUND(AVG(e.nota), 2) AS promedio
-FROM evaluaciones e
-JOIN backlog b ON e.tarea_id = b.id
-JOIN grados g ON b.curso_id = g.id
-WHERE b.curso_id = ?
-GROUP BY g.nombre;
-
-  `;
+        SELECT g.nombre AS grado, ROUND(AVG(e.nota), 2) AS promedio
+        FROM evaluaciones e
+        JOIN backlog b ON e.tarea_id = b.id
+        JOIN grados g ON b.curso_id = g.id
+        WHERE b.curso_id = $1
+        GROUP BY g.nombre;
+      `;
 
       connection.query(sql, [grado_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -695,15 +695,15 @@ GROUP BY g.nombre;
     getRetrospectivasPorSprint: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-      SELECT s.nombre AS sprint, COUNT(r.id) AS total_retrospectivas
-      FROM retrospectivas r
-      JOIN sprints s ON r.sprint_id = s.id
-      WHERE s.curso_id = ?
-      GROUP BY s.nombre;
-    `;
+        SELECT s.nombre AS sprint, COUNT(r.id) AS total_retrospectivas
+        FROM retrospectivas r
+        JOIN sprints s ON r.sprint_id = s.id
+        WHERE s.curso_id = $1
+        GROUP BY s.nombre;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -711,20 +711,19 @@ GROUP BY g.nombre;
     getFeedbackPorGrado: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-SELECT 
-  g.nombre AS grado,
-  COUNT(e.id) AS total_evaluaciones,
-  COUNT(e.retroalimentacion) AS con_retroalimentacion
-FROM evaluaciones e
-JOIN backlog b ON e.tarea_id = b.id
-JOIN grados g ON b.curso_id = g.id
-WHERE g.id = ?
-GROUP BY g.nombre;
-
-    `;
+        SELECT 
+          g.nombre AS grado,
+          COUNT(e.id) AS total_evaluaciones,
+          COUNT(e.retroalimentacion) AS con_retroalimentacion
+        FROM evaluaciones e
+        JOIN backlog b ON e.tarea_id = b.id
+        JOIN grados g ON b.curso_id = g.id
+        WHERE g.id = $1
+        GROUP BY g.nombre;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results[0] || {});
+        res.json(results.rows[0] || {});
       });
     },
 
@@ -732,14 +731,14 @@ GROUP BY g.nombre;
     getSprintsFinalizadosPorGrado: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-      SELECT id, nombre, fecha_fin
-      FROM sprints
-      WHERE curso_id = ? AND fecha_fin < CURDATE()
-      ORDER BY fecha_fin DESC;
-    `;
+        SELECT id, nombre, fecha_fin
+        FROM sprints
+        WHERE curso_id = $1 AND fecha_fin < CURRENT_DATE
+        ORDER BY fecha_fin DESC;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -747,16 +746,16 @@ GROUP BY g.nombre;
     getTareasAntiguasPendientes: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-      SELECT t.id, t.titulo, b.fecha_creacion
-      FROM tareas t
-      JOIN backlog b ON t.backlog_id = b.id
-      WHERE b.curso_id = ? AND t.estado NOT IN ('Hecho', 'Culminado')
-      ORDER BY b.fecha_creacion ASC
-      LIMIT 5;
-    `;
+        SELECT t.id, t.titulo, b.fecha_creacion
+        FROM tareas t
+        JOIN backlog b ON t.backlog_id = b.id
+        WHERE b.curso_id = $1 AND t.estado NOT IN ('Hecho', 'Culminado')
+        ORDER BY b.fecha_creacion ASC
+        LIMIT 5;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -764,19 +763,17 @@ GROUP BY g.nombre;
     getDiasConsecutivosDailys: (req, res) => {
       const curso_id = req.params.curso_id;
       const sql = `
-SELECT u.id, u.nombre_completo, COUNT(*) AS total_dailys
-FROM usuarios u
-JOIN dailys d ON u.id = d.usuario_id
-WHERE u.curso_id = ?
-GROUP BY u.id
-ORDER BY total_dailys DESC
-LIMIT 1;
-
-
-    `;
+        SELECT u.id, u.nombre_completo, COUNT(*) AS total_dailys
+        FROM usuarios u
+        JOIN dailys d ON u.id = d.usuario_id
+        WHERE u.curso_id = $1
+        GROUP BY u.id, u.nombre_completo
+        ORDER BY total_dailys DESC
+        LIMIT 1;
+      `;
       connection.query(sql, [curso_id], (err, results) => {
         if (err) return res.status(500).json({ error: err });
-        res.json(results[0] || { dias_consecutivos: 0 });
+        res.json(results.rows[0] || { dias_consecutivos: 0 });
       });
     },
   };

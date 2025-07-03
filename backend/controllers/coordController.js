@@ -12,14 +12,14 @@ module.exports = (connection) => {
           b.titulo, 
           b.descripcion, 
           b.curso_id,
-          DATE_FORMAT(b.fecha_creacion, '%Y-%m-%d') AS fecha_creacion,
+          TO_CHAR(b.fecha_creacion, 'YYYY-MM-DD') AS fecha_creacion,
           g.nombre AS grado
         FROM backlog b
         JOIN proyectos p ON b.proyecto_id = p.id
         LEFT JOIN grados g ON b.curso_id = g.id
-        WHERE b.proyecto_id = ?
-          AND b.creado_por = ?
-          AND p.responsable_id = ?
+        WHERE b.proyecto_id = $1
+          AND b.creado_por = $2
+          AND p.responsable_id = $3
         ORDER BY b.id DESC
       `;
 
@@ -31,7 +31,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener actividades" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -48,11 +48,11 @@ module.exports = (connection) => {
           b.proyecto_id,
           g.nombre AS grado,
           p.nombre AS proyecto,
-          DATE_FORMAT(b.fecha_creacion, '%Y-%m-%d') AS fecha_creacion
+          TO_CHAR(b.fecha_creacion, 'YYYY-MM-DD') AS fecha_creacion
         FROM backlog b
         LEFT JOIN grados g ON b.curso_id = g.id
         LEFT JOIN proyectos p ON b.proyecto_id = p.id
-        WHERE b.creado_por = ?
+        WHERE b.creado_por = $1
         ORDER BY b.id DESC
       `;
 
@@ -62,7 +62,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener tareas del backlog" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -71,21 +71,21 @@ module.exports = (connection) => {
       const { grado_id } = req.params;
 
       const sql = `
-    SELECT 
-      b.id, 
-      b.titulo, 
-      b.descripcion, 
-      b.curso_id,
-      b.proyecto_id,
-      DATE_FORMAT(b.fecha_creacion, '%Y-%m-%d') AS fecha_creacion,
-      g.nombre AS grado,
-      p.nombre AS proyecto
-    FROM backlog b
-    LEFT JOIN grados g ON b.curso_id = g.id
-    LEFT JOIN proyectos p ON b.proyecto_id = p.id
-    WHERE b.curso_id = ?
-    ORDER BY b.id DESC
-  `;
+        SELECT 
+          b.id, 
+          b.titulo, 
+          b.descripcion, 
+          b.curso_id,
+          b.proyecto_id,
+          TO_CHAR(b.fecha_creacion, 'YYYY-MM-DD') AS fecha_creacion,
+          g.nombre AS grado,
+          p.nombre AS proyecto
+        FROM backlog b
+        LEFT JOIN grados g ON b.curso_id = g.id
+        LEFT JOIN proyectos p ON b.proyecto_id = p.id
+        WHERE b.curso_id = $1
+        ORDER BY b.id DESC
+      `;
 
       connection.query(sql, [grado_id], (err, results) => {
         if (err) {
@@ -93,31 +93,31 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener backlog por grado" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
     // Obtener todas las tareas del backlog
     getAllBacklog: (req, res) => {
       const sql = `
-    SELECT 
-      b.id,
-      b.titulo,
-      b.descripcion,
-      b.curso_id,
-      g.nombre AS grado,
-      p.nombre AS proyecto
-    FROM backlog b
-    LEFT JOIN grados g ON b.curso_id = g.id
-    LEFT JOIN proyectos p ON b.proyecto_id = p.id
-    ORDER BY b.id DESC
-  `;
+        SELECT 
+          b.id,
+          b.titulo,
+          b.descripcion,
+          b.curso_id,
+          g.nombre AS grado,
+          p.nombre AS proyecto
+        FROM backlog b
+        LEFT JOIN grados g ON b.curso_id = g.id
+        LEFT JOIN proyectos p ON b.proyecto_id = p.id
+        ORDER BY b.id DESC
+      `;
 
       connection.query(sql, (err, results) => {
         if (err) {
           return res.status(500).json({ error: "Error al obtener backlog" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -132,7 +132,8 @@ module.exports = (connection) => {
 
       const sql = `
         INSERT INTO backlog (titulo, descripcion, curso_id, creado_por, proyecto_id, fecha_creacion)
-        VALUES (?, ?, ?, ?, ?, NOW())
+        VALUES ($1, $2, $3, $4, $5, CURRENT_DATE)
+        RETURNING id
       `;
 
       connection.query(
@@ -144,7 +145,7 @@ module.exports = (connection) => {
           }
           res
             .status(201)
-            .json({ message: "Tarea creada", id: result.insertId });
+            .json({ message: "Tarea creada", id: result.rows[0].id });
         }
       );
     },
@@ -160,8 +161,8 @@ module.exports = (connection) => {
 
       const sql = `
         UPDATE backlog
-        SET titulo = ?, descripcion = ?, curso_id = ?, proyecto_id = ?
-        WHERE id = ?
+        SET titulo = $1, descripcion = $2, curso_id = $3, proyecto_id = $4
+        WHERE id = $5
       `;
 
       connection.query(
@@ -181,7 +182,7 @@ module.exports = (connection) => {
     // Eliminar tarea (backlog)
     deleteBacklog: (req, res) => {
       const { id } = req.params;
-      const sql = "DELETE FROM backlog WHERE id = ?";
+      const sql = "DELETE FROM backlog WHERE id = $1";
 
       connection.query(sql, [id], (err) => {
         if (err) {
@@ -202,7 +203,7 @@ module.exports = (connection) => {
       }
 
       // Verificar si el tarea_id existe en la tabla 'backlog'
-      const sqlCheckBacklog = `SELECT id FROM backlog WHERE id = ?`;
+      const sqlCheckBacklog = `SELECT id FROM backlog WHERE id = $1`;
       connection.query(sqlCheckBacklog, [tarea_id], (err, results) => {
         if (err) {
           return res
@@ -210,7 +211,7 @@ module.exports = (connection) => {
             .json({ error: "Error interno al verificar backlog" });
         }
 
-        if (results.length === 0) {
+        if (results.rows.length === 0) {
           return res
             .status(400)
             .json({ error: "El backlog seleccionado no existe" });
@@ -219,7 +220,8 @@ module.exports = (connection) => {
         // Si el backlog_id existe, proceder con la inserción de la evaluación
         const sql = `
           INSERT INTO evaluaciones (tarea_id, usuario_id, nota, retroalimentacion, evaluado_por, fecha)
-          VALUES (?, ?, ?, ?, ?, CURDATE())
+          VALUES ($1, $2, $3, $4, $5, CURRENT_DATE)
+          RETURNING id
         `;
 
         connection.query(
@@ -232,7 +234,7 @@ module.exports = (connection) => {
                 .json({ error: "Error interno al guardar evaluación" });
             }
             res.status(201).json({
-              id: result.insertId,
+              id: result.rows[0].id,
               message: "Evaluación guardada correctamente",
             });
           }
@@ -245,21 +247,21 @@ module.exports = (connection) => {
       const { evaluadorId } = req.params;
 
       const sql = `
-    SELECT 
-      e.id, 
-      e.nota, 
-      e.retroalimentacion, 
-      e.fecha,
-      u.nombre_completo AS estudiante,
-      b.titulo AS backlog,
-      g.nombre AS grado
-    FROM evaluaciones e
-    LEFT JOIN usuarios u ON e.usuario_id = u.id
-    LEFT JOIN backlog b ON e.tarea_id = b.id
-    LEFT JOIN grados g ON b.curso_id = g.id
-    WHERE e.evaluado_por = ?
-    ORDER BY e.fecha DESC
-  `;
+        SELECT 
+          e.id, 
+          e.nota, 
+          e.retroalimentacion, 
+          e.fecha,
+          u.nombre_completo AS estudiante,
+          b.titulo AS backlog,
+          g.nombre AS grado
+        FROM evaluaciones e
+        LEFT JOIN usuarios u ON e.usuario_id = u.id
+        LEFT JOIN backlog b ON e.tarea_id = b.id
+        LEFT JOIN grados g ON b.curso_id = g.id
+        WHERE e.evaluado_por = $1
+        ORDER BY e.fecha DESC
+      `;
 
       connection.query(sql, [evaluadorId], (err, results) => {
         if (err) {
@@ -267,14 +269,14 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al cargar evaluaciones" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
-    // Obtener evaluaciones por tarea
+    // Eliminar evaluación
     deleteEvaluacion: (req, res) => {
       const { id } = req.params;
-      const sql = "DELETE FROM evaluaciones WHERE id = ?";
+      const sql = "DELETE FROM evaluaciones WHERE id = $1";
 
       connection.query(sql, [id], (err) => {
         if (err) {
@@ -296,10 +298,10 @@ module.exports = (connection) => {
       }
 
       const sql = `
-    UPDATE evaluaciones
-    SET tarea_id = ?, nota = ?, retroalimentacion = ?
-    WHERE id = ?
-  `;
+        UPDATE evaluaciones
+        SET tarea_id = $1, nota = $2, retroalimentacion = $3
+        WHERE id = $4
+      `;
 
       connection.query(sql, [tarea_id, nota, retroalimentacion, id], (err) => {
         if (err) {
@@ -317,22 +319,22 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT 
-      g.nombre AS grado,
-      t.estado,
-      COUNT(t.id) AS total
-    FROM tareas t
-    LEFT JOIN backlog b ON t.backlog_id = b.id
-    LEFT JOIN grados g ON b.curso_id = g.id
-    LEFT JOIN proyectos p ON b.proyecto_id = p.id
-    WHERE p.responsable_id = ?
-    GROUP BY g.id, t.estado
-  `;
+        SELECT 
+          g.nombre AS grado,
+          t.estado,
+          COUNT(t.id) AS total
+        FROM tareas t
+        LEFT JOIN backlog b ON t.backlog_id = b.id
+        LEFT JOIN grados g ON b.curso_id = g.id
+        LEFT JOIN proyectos p ON b.proyecto_id = p.id
+        WHERE p.responsable_id = $1
+        GROUP BY g.id, g.nombre, t.estado
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res.status(500).json({ error: "Error al obtener tareas" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -341,34 +343,34 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT u.nombre_completo AS estudiante, COUNT(d.id) AS total_dailys
-    FROM dailys d
-    LEFT JOIN usuarios u ON d.usuario_id = u.id
-    LEFT JOIN sprints s ON d.sprint_id = s.id
-    LEFT JOIN proyectos p ON s.curso_id = p.curso_id
-    WHERE p.responsable_id = ?
-    GROUP BY d.usuario_id
-  `;
+        SELECT u.nombre_completo AS estudiante, COUNT(d.id) AS total_dailys
+        FROM dailys d
+        LEFT JOIN usuarios u ON d.usuario_id = u.id
+        LEFT JOIN sprints s ON d.sprint_id = s.id
+        LEFT JOIN proyectos p ON s.curso_id = p.curso_id
+        WHERE p.responsable_id = $1
+        GROUP BY d.usuario_id, u.nombre_completo
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener participación" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
     
     // Reporte: Participación en dailys por grado
     getParticipacionDailysPorGrado: (req, res) => {
       const sql = `
-    SELECT g.nombre AS grado, COUNT(d.id) AS total_dailys
-    FROM dailys d
-    JOIN usuarios u ON d.usuario_id = u.id
-    JOIN usuario_grado ug ON u.id = ug.usuario_id
-    JOIN grados g ON ug.grado_id = g.id
-    GROUP BY g.nombre;
-  `;
+        SELECT g.nombre AS grado, COUNT(d.id) AS total_dailys
+        FROM dailys d
+        JOIN usuarios u ON d.usuario_id = u.id
+        JOIN usuario_grado ug ON u.id = ug.usuario_id
+        JOIN grados g ON ug.grado_id = g.id
+        GROUP BY g.nombre
+      `;
 
       connection.query(sql, (err, results) => {
         if (err) {
@@ -376,7 +378,7 @@ module.exports = (connection) => {
             .status(500)
             .json({ error: "Error al obtener participación por grado" });
         }
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -385,22 +387,22 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT 
-      g.nombre AS grado,
-      ROUND(AVG(e.nota), 2) AS promedio
-    FROM evaluaciones e
-    LEFT JOIN backlog b ON e.tarea_id = b.id
-    LEFT JOIN grados g ON b.curso_id = g.id
-    WHERE e.evaluado_por = ?
-    GROUP BY g.id
-  `;
+        SELECT 
+          g.nombre AS grado,
+          ROUND(AVG(e.nota), 2) AS promedio
+        FROM evaluaciones e
+        LEFT JOIN backlog b ON e.tarea_id = b.id
+        LEFT JOIN grados g ON b.curso_id = g.id
+        WHERE e.evaluado_por = $1
+        GROUP BY g.id, g.nombre
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener promedios por grado" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
     
@@ -409,20 +411,20 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT s.nombre AS sprint, COUNT(r.id) AS total_retrospectivas
-    FROM retrospectivas r
-    LEFT JOIN sprints s ON r.sprint_id = s.id
-    LEFT JOIN proyectos p ON s.curso_id = p.curso_id
-    WHERE p.responsable_id = ?
-    GROUP BY s.id
-  `;
+        SELECT s.nombre AS sprint, COUNT(r.id) AS total_retrospectivas
+        FROM retrospectivas r
+        LEFT JOIN sprints s ON r.sprint_id = s.id
+        LEFT JOIN proyectos p ON s.curso_id = p.curso_id
+        WHERE p.responsable_id = $1
+        GROUP BY s.id, s.nombre
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener retrospectivas" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -431,19 +433,19 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT g.nombre AS grado, COUNT(b.id) AS tareas_creadas
-    FROM backlog b
-    LEFT JOIN grados g ON b.curso_id = g.id
-    WHERE b.creado_por = ?
-    GROUP BY g.id
-  `;
+        SELECT g.nombre AS grado, COUNT(b.id) AS tareas_creadas
+        FROM backlog b
+        LEFT JOIN grados g ON b.curso_id = g.id
+        WHERE b.creado_por = $1
+        GROUP BY g.id, g.nombre
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener actividad de backlog" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -452,23 +454,23 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT 
-      g.nombre AS grado,
-      ROUND(AVG(e.nota), 2) AS promedio
-    FROM evaluaciones e
-    LEFT JOIN backlog b ON e.tarea_id = b.id
-    LEFT JOIN grados g ON b.curso_id = g.id
-    WHERE e.evaluado_por = ?
-    GROUP BY g.id
-    ORDER BY promedio DESC
-  `;
+        SELECT 
+          g.nombre AS grado,
+          ROUND(AVG(e.nota), 2) AS promedio
+        FROM evaluaciones e
+        LEFT JOIN backlog b ON e.tarea_id = b.id
+        LEFT JOIN grados g ON b.curso_id = g.id
+        WHERE e.evaluado_por = $1
+        GROUP BY g.id, g.nombre
+        ORDER BY promedio DESC
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener ranking por grado" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -477,23 +479,23 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT u.nombre_completo AS estudiante,
-      COUNT(t.id) AS tareas_asignadas,
-      SUM(CASE WHEN t.estado = 'Culminado' THEN 1 ELSE 0 END) AS tareas_cumplidas
-    FROM tareas t
-    LEFT JOIN usuarios u ON t.asignado_a = u.id
-    LEFT JOIN backlog b ON t.backlog_id = b.id
-    LEFT JOIN proyectos p ON b.proyecto_id = p.id
-    WHERE p.responsable_id = ?
-    GROUP BY u.id
-  `;
+        SELECT u.nombre_completo AS estudiante,
+          COUNT(t.id) AS tareas_asignadas,
+          SUM(CASE WHEN t.estado = 'Culminado' THEN 1 ELSE 0 END) AS tareas_cumplidas
+        FROM tareas t
+        LEFT JOIN usuarios u ON t.asignado_a = u.id
+        LEFT JOIN backlog b ON t.backlog_id = b.id
+        LEFT JOIN proyectos p ON b.proyecto_id = p.id
+        WHERE p.responsable_id = $1
+        GROUP BY u.id, u.nombre_completo
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener cumplimiento" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
 
@@ -502,22 +504,22 @@ module.exports = (connection) => {
       const { coordinador_id } = req.params;
 
       const sql = `
-    SELECT t.titulo, g.nombre AS grado, b.fecha_creacion
-    FROM tareas t
-    LEFT JOIN backlog b ON t.backlog_id = b.id
-    LEFT JOIN proyectos p ON b.proyecto_id = p.id
-    LEFT JOIN grados g ON b.curso_id = g.id
-    WHERE t.estado != 'Culminado' AND p.responsable_id = ?
-    ORDER BY b.fecha_creacion ASC
-    LIMIT 10
-  `;
+        SELECT t.titulo, g.nombre AS grado, b.fecha_creacion
+        FROM tareas t
+        LEFT JOIN backlog b ON t.backlog_id = b.id
+        LEFT JOIN proyectos p ON b.proyecto_id = p.id
+        LEFT JOIN grados g ON b.curso_id = g.id
+        WHERE t.estado != 'Culminado' AND p.responsable_id = $1
+        ORDER BY b.fecha_creacion ASC
+        LIMIT 10
+      `;
 
       connection.query(sql, [coordinador_id], (err, results) => {
         if (err)
           return res
             .status(500)
             .json({ error: "Error al obtener tareas antiguas" });
-        res.json(results);
+        res.json(results.rows);
       });
     },
   };

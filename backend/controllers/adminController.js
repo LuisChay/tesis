@@ -7,8 +7,8 @@ module.exports = (connection) => {
       const sql = `
     SELECT p.id, p.nombre AS titulo, p.objetivos AS objetivo, g.nombre AS grado,
            p.responsable_id, u.nombre_completo AS responsable,
-           DATE_FORMAT(p.fecha_inicio, '%Y-%m-%d') AS fechaInicio,
-           DATE_FORMAT(p.fecha_fin, '%Y-%m-%d') AS fechaFin
+           TO_CHAR(p.fecha_inicio, 'YYYY-MM-DD') AS fechaInicio,
+           TO_CHAR(p.fecha_fin, 'YYYY-MM-DD') AS fechaFin
     FROM proyectos p
     LEFT JOIN grados g ON p.curso_id = g.id
     LEFT JOIN usuarios u ON p.responsable_id = u.id
@@ -42,7 +42,8 @@ module.exports = (connection) => {
 
       const sql = `
         INSERT INTO proyectos (nombre, objetivos, curso_id, responsable_id, fecha_inicio, fecha_fin, actividades)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id
       `;
 
       connection.query(
@@ -61,7 +62,7 @@ module.exports = (connection) => {
             return res.status(500).json({ error: "Error al crear proyecto" });
           res.status(201).json({
             message: "Proyecto creado correctamente",
-            id: result.insertId,
+            id: result.rows[0].id,
           });
         }
       );
@@ -84,8 +85,8 @@ module.exports = (connection) => {
       }
       const sql = `
       UPDATE proyectos
-      SET nombre = ?, objetivos = ?, curso_id = ?, responsable_id = ?, fecha_inicio = ?, fecha_fin = ?, actividades = ?
-      WHERE id = ?
+      SET nombre = $1, objetivos = $2, curso_id = $3, responsable_id = $4, fecha_inicio = $5, fecha_fin = $6, actividades = $7
+      WHERE id = $8
     `;
       connection.query(
         sql,
@@ -112,7 +113,7 @@ module.exports = (connection) => {
     // Eliminar proyecto
     deleteProyecto: (req, res) => {
       const { id } = req.params;
-      const sql = "DELETE FROM proyectos WHERE id = ?";
+      const sql = "DELETE FROM proyectos WHERE id = $1";
       connection.query(sql, [id], (err) => {
         if (err)
           return res.status(500).json({ error: "Error al eliminar proyecto" });
@@ -141,17 +142,17 @@ module.exports = (connection) => {
           .json({ error: "El nombre del grado es obligatorio" });
       }
 
-      const sql = "INSERT INTO grados (nombre) VALUES (?)";
+      const sql = "INSERT INTO grados (nombre) VALUES ($1) RETURNING id";
       connection.query(sql, [nombre], (err, result) => {
         if (err) {
-          if (err.code === "ER_DUP_ENTRY") {
+          if (err.code === "23505") { // UNIQUE_VIOLATION en PostgreSQL
             return res.status(409).json({ error: "El grado ya existe" });
           }
           return res.status(500).json({ error: "Error al crear grado" });
         }
         res
           .status(201)
-          .json({ message: "Grado creado correctamente", id: result.insertId });
+          .json({ message: "Grado creado correctamente", id: result.rows[0].id });
       });
     },
 
@@ -164,7 +165,7 @@ module.exports = (connection) => {
           .status(400)
           .json({ error: "El nombre del grado es obligatorio" });
       }
-      const sql = "UPDATE grados SET nombre = ? WHERE id = ?";
+      const sql = "UPDATE grados SET nombre = $1 WHERE id = $2";
       connection.query(sql, [nombre, id], (err) => {
         if (err)
           return res.status(500).json({ error: "Error al actualizar grado" });
@@ -175,7 +176,7 @@ module.exports = (connection) => {
     // Eliminar un grado
     deleteGrado: (req, res) => {
       const { id } = req.params;
-      const sql = "DELETE FROM grados WHERE id = ?";
+      const sql = "DELETE FROM grados WHERE id = $1";
       connection.query(sql, [id], (err) => {
         if (err)
           return res.status(500).json({ error: "Error al eliminar grado" });
@@ -190,7 +191,7 @@ module.exports = (connection) => {
     SELECT g.nombre AS grado, COUNT(p.id) AS total_proyectos
     FROM grados g
     LEFT JOIN proyectos p ON p.curso_id = g.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY g.nombre;
   `;
       connection.query(sql, (err, results) => {
@@ -212,7 +213,7 @@ module.exports = (connection) => {
     FROM grados g
     LEFT JOIN backlog b ON b.curso_id = g.id
     LEFT JOIN tareas t ON t.backlog_id = b.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY g.nombre;
   `;
       connection.query(sql, (err, results) => {
@@ -229,11 +230,11 @@ module.exports = (connection) => {
       const sql = `
     SELECT 
       g.nombre AS grado,
-      ROUND(AVG(e.nota), 2) AS promedio_nota
+      ROUND(AVG(e.nota)::numeric, 2) AS promedio_nota
     FROM evaluaciones e
     LEFT JOIN backlog b ON e.tarea_id = b.id
     LEFT JOIN grados g ON b.curso_id = g.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY g.nombre;
   `;
       connection.query(sql, (err, results) => {
@@ -256,7 +257,7 @@ module.exports = (connection) => {
     FROM sprints s
     LEFT JOIN grados g ON s.curso_id = g.id
     LEFT JOIN retrospectivas r ON r.sprint_id = s.id
-    GROUP BY s.id
+    GROUP BY s.id, s.nombre, g.nombre
     ORDER BY s.fecha_inicio DESC
   `;
       connection.query(sql, (err, results) => {
@@ -278,7 +279,7 @@ module.exports = (connection) => {
     FROM grados g
     LEFT JOIN backlog b ON b.curso_id = g.id
     LEFT JOIN tareas t ON t.backlog_id = b.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY g.nombre;
   `;
       connection.query(sql, (err, results) => {
@@ -295,11 +296,11 @@ module.exports = (connection) => {
       const sql = `
     SELECT 
       g.nombre AS grado,
-      SUM(CASE WHEN p.fecha_fin IS NULL OR p.fecha_fin >= CURDATE() THEN 1 ELSE 0 END) AS activos,
-      SUM(CASE WHEN p.fecha_fin < CURDATE() THEN 1 ELSE 0 END) AS finalizados
+      SUM(CASE WHEN p.fecha_fin IS NULL OR p.fecha_fin >= CURRENT_DATE THEN 1 ELSE 0 END) AS activos,
+      SUM(CASE WHEN p.fecha_fin < CURRENT_DATE THEN 1 ELSE 0 END) AS finalizados
     FROM grados g
     LEFT JOIN proyectos p ON p.curso_id = g.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY g.nombre;
   `;
       connection.query(sql, (err, results) => {
@@ -316,11 +317,11 @@ module.exports = (connection) => {
       const sql = `
     SELECT 
       g.nombre AS grado,
-      ROUND(AVG(e.nota), 2) AS promedio_nota
+      ROUND(AVG(e.nota)::numeric, 2) AS promedio_nota
     FROM evaluaciones e
     LEFT JOIN backlog b ON e.tarea_id = b.id
     LEFT JOIN grados g ON b.curso_id = g.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY promedio_nota DESC;
   `;
       connection.query(sql, (err, results) => {
@@ -344,7 +345,7 @@ module.exports = (connection) => {
     FROM sprints s
     LEFT JOIN grados g ON s.curso_id = g.id
     LEFT JOIN tareas t ON t.sprint_id = s.id
-    GROUP BY s.id
+    GROUP BY s.id, s.nombre, g.nombre
     ORDER BY s.fecha_inicio DESC
   `;
       connection.query(sql, (err, results) => {
@@ -366,7 +367,7 @@ module.exports = (connection) => {
     FROM evaluaciones e
     LEFT JOIN backlog b ON e.tarea_id = b.id
     LEFT JOIN grados g ON b.curso_id = g.id
-    GROUP BY g.id
+    GROUP BY g.id, g.nombre
     ORDER BY g.nombre;
   `;
       connection.query(sql, (err, results) => {
@@ -387,7 +388,7 @@ module.exports = (connection) => {
         SELECT g.id, g.nombre
         FROM usuario_grado ug
         JOIN grados g ON ug.grado_id = g.id
-        WHERE ug.usuario_id = ?
+        WHERE ug.usuario_id = $1
       `;
       connection.query(sql, [usuario_id], (err, results) => {
         if (err)
@@ -403,7 +404,7 @@ module.exports = (connection) => {
       if (!usuario_id || !grado_id)
         return res.status(400).json({ error: "Datos incompletos" });
 
-      const checkSql = `SELECT id FROM usuario_grado WHERE usuario_id = ? AND grado_id = ?`;
+      const checkSql = `SELECT id FROM usuario_grado WHERE usuario_id = $1 AND grado_id = $2`;
       connection.query(checkSql, [usuario_id, grado_id], (err, rows) => {
         if (err)
           return res
@@ -412,13 +413,13 @@ module.exports = (connection) => {
         if (rows.length > 0)
           return res.status(409).json({ error: "Ya está asignado" });
 
-        const insertSql = `INSERT INTO usuario_grado (usuario_id, grado_id) VALUES (?, ?)`;
+        const insertSql = `INSERT INTO usuario_grado (usuario_id, grado_id) VALUES ($1, $2) RETURNING id`;
         connection.query(insertSql, [usuario_id, grado_id], (err, result) => {
           if (err)
             return res.status(500).json({ error: "Error al asignar grado" });
           res
             .status(201)
-            .json({ message: "Asignación exitosa", id: result.insertId });
+            .json({ message: "Asignación exitosa", id: result.rows[0].id });
         });
       });
     },
@@ -426,7 +427,7 @@ module.exports = (connection) => {
     // Eliminar asignación
     eliminarAsignacion: (req, res) => {
       const { usuario_id, grado_id } = req.params;
-      const sql = `DELETE FROM usuario_grado WHERE usuario_id = ? AND grado_id = ?`;
+      const sql = `DELETE FROM usuario_grado WHERE usuario_id = $1 AND grado_id = $2`;
       connection.query(sql, [usuario_id, grado_id], (err) => {
         if (err)
           return res
